@@ -1,0 +1,173 @@
+#gui.py
+import tkinter as tk
+import random
+from PIL import Image, ImageTk  # Pour redimensionner l'image
+
+class FlappyGUI:
+    def __init__(self, root, start_callback=None):
+        """Interface principale du jeu Flappy Bird"""
+        self.root = root
+        self.root.title("Flappy Bird")
+        self.root.attributes("-fullscreen", True)
+        self.root.bind("<Escape>", lambda e: self.root.destroy())  # Échap pour quitter
+        self.start_callback = start_callback
+        self.start_page()
+
+    def start_page(self):
+        """Page d’accueil : Press Start + Quitter"""
+        self.clear()
+        frame = tk.Frame(self.root, bg="#87CEEB")
+        frame.pack(fill="both", expand=True)
+
+        title = tk.Label(
+            frame,
+            text=" Flappy Bird ",
+            font=("Arial", 28, "bold"),
+            bg="#87CEEB",
+            fg="white"
+        )
+        title.pack(pady=150)
+
+        btn_start = tk.Button(
+            frame,
+            text="Press Start",
+            font=("Arial", 16, "bold"),
+            bg="#FFD700",
+            fg="black",
+            relief="raised",
+            bd=4,
+            command=self.start_game
+        )
+        btn_start.pack(pady=10)
+
+        btn_quit = tk.Button(
+            frame,
+            text="Quitter",
+            font=("Arial", 16, "bold"),
+            bg="#FF4C4C",
+            fg="white",
+            relief="raised",
+            bd=4,
+            command=self.quit_game
+        )
+        btn_quit.pack(pady=10)
+
+    def start_game(self):
+        """Appelée quand on clique sur 'Press Start'"""
+        if self.start_callback:
+            self.start_callback()
+        else:
+            self.game_page()
+
+    def game_page(self):
+        """Fenêtre principale du jeu"""
+        self.clear()
+
+        self.canvas = tk.Canvas(
+            self.root,
+            width=self.root.winfo_screenwidth(),
+            height=self.root.winfo_screenheight(),
+            bg="#70C5CE"
+        )
+        self.canvas.pack(fill="both", expand=True)
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+
+        # Sol
+        self.ground = self.canvas.create_rectangle(
+            0, self.screen_height - 50, self.screen_width, self.screen_height,
+            fill="#DEB887", outline=""
+        )
+
+        # Bird avec image réduite
+        self.bird_size = 50  # taille souhaitée de l'oiseau
+        self.bird_x = 100
+        self.bird_y = self.screen_height // 2
+
+        img = Image.open("bird.png")
+        img = img.resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS)
+        self.bird_img = ImageTk.PhotoImage(img)
+
+        # Une seule instance de l'oiseau
+        self.bird = self.canvas.create_image(self.bird_x, self.bird_y, anchor="nw", image=self.bird_img)
+
+        # Liste de tuyaux
+        self.pipes = []
+        for i in range(2):
+            x = self.screen_width + i * (self.screen_width // 2)
+            self.create_pipe(x)
+
+        # Variables physiques
+        self.velocity = 0
+        self.gravity = 1
+        self.flap_strength = -15
+
+        # Contrôle (Espace)
+        self.root.bind("<space>", self.on_space_press)
+
+        # Démarrer le jeu
+        self.update_game()
+
+    def create_pipe(self, x):
+        """Crée une paire de tuyaux avec un trou aléatoire"""
+        gap = random.randint(150, 250)
+        top_height = random.randint(100, self.screen_height - gap - 100)
+        bottom_y = top_height + gap
+        pipe_width = 100
+
+        top = self.canvas.create_rectangle(x, 0, x + pipe_width, top_height, fill="green", outline="black")
+        bottom = self.canvas.create_rectangle(x, bottom_y, x + pipe_width, self.screen_height, fill="green", outline="black")
+        self.pipes.append((top, bottom))
+
+    def move_pipes(self):
+        """Fait défiler les tuyaux vers la gauche et les recycle"""
+        speed = 8
+        for top, bottom in list(self.pipes):
+            self.canvas.move(top, -speed, 0)
+            self.canvas.move(bottom, -speed, 0)
+            x1, _, x2, _ = self.canvas.coords(top)
+            if x2 < 0:
+                self.canvas.delete(top)
+                self.canvas.delete(bottom)
+                self.pipes.remove((top, bottom))
+                self.create_pipe(self.screen_width)
+
+    def update_game(self):
+        """Boucle principale du jeu"""
+        self.velocity += self.gravity
+        self.canvas.move(self.bird, 0, self.velocity)
+
+        x, y = self.canvas.coords(self.bird)
+
+        # Limiter le bird au sol et au plafond
+        if y >= self.screen_height - 50 - self.bird_size:
+            self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
+            self.velocity = 0
+        elif y <= 0:
+            self.canvas.coords(self.bird, self.bird_x, 0)
+            self.velocity = 0
+
+        # Défilement des tuyaux
+        self.move_pipes()
+
+        # Relancer la boucle
+        self.canvas.after(30, self.update_game)
+
+    def on_space_press(self, event):
+        """Quand on appuie sur ESPACE → le bird monte"""
+        self.velocity = self.flap_strength
+
+    def quit_game(self):
+        """Quitte proprement le jeu"""
+        self.root.destroy()
+
+    def clear(self):
+        """Efface tout le contenu de la fenêtre"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+# Test en local
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FlappyGUI(root)
+    root.mainloop()

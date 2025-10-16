@@ -120,7 +120,7 @@ class FlappyGUI:
         self.pipes.append((top, bottom))
 
     def move_pipes(self):
-        """Fait défiler les tuyaux vers la gauche et les recycle"""
+        """Fait défiler les tuyaux vers la gauche """
         speed = 8
         for top, bottom in list(self.pipes):
             self.canvas.move(top, -speed, 0)
@@ -154,7 +154,7 @@ class FlappyGUI:
         self.canvas.after(30, self.update_game)
 
     def on_space_press(self, event):
-        """Quand on appuie sur ESPACE → le bird monte"""
+        """Quand on appuie sur ESPACE le bird monte"""
         self.velocity = self.flap_strength
 
     def quit_game(self):

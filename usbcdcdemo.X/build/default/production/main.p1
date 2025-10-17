@@ -30,26 +30,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 "16 ./usb_cdc_lib.h
 [; ;./usb_cdc_lib.h: 16: unsigned char isUSBReady(void);
 [v _isUSBReady `(uc ~T0 @X0 0 ef ]
-"2711 C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h
-[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2711:     struct {
-[s S117 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S117 . RD0 RD1 RD2 RD3 RD4 RD5 RD6 RD7 ]
-"2721
-[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2721:     struct {
-[s S118 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S118 . SPP0 SPP1 SPP2 SPP3 SPP4 SPP5 SPP6 SPP7 ]
-"2731
-[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2731:     struct {
-[s S119 :7 `uc 1 :1 `uc 1 ]
-[n S119 . . SS2 ]
-"2710
-[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2710: typedef union {
-[u S116 `S117 1 `S118 1 `S119 1 ]
-[n S116 . . . . ]
-"2736
-[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2736: extern volatile PORTDbits_t PORTDbits __attribute__((address(0xF83)));
-[v _PORTDbits `VS116 ~T0 @X0 0 e@3971 ]
-"3191
+"20 main.c
+[; ;main.c: 20:         USBDeviceTasks();
+[v _readButtonAsm `(uc ~T0 @X0 0 ef ]
+"3191 C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h
 [; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3191:     struct {
 [s S133 :1 `uc 1 :1 `uc 1 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S133 . LATC0 LATC1 LATC2 . LATC6 LATC7 ]
@@ -64,11 +48,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 "3208
 [; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3208: extern volatile LATCbits_t LATCbits __attribute__((address(0xF8B)));
 [v _LATCbits `VS132 ~T0 @X0 0 e@3979 ]
-"12 main.c
-[; ;main.c: 12: void sendFlap(void);
+"19 main.c
+[; ;main.c: 19: 
 [v _sendFlap `(v ~T0 @X0 0 ef ]
-"11
-[; ;main.c: 11: void debounceDelay(void);
+"18
+[; ;main.c: 18:     while(1) {
 [v _debounceDelay `(v ~T0 @X0 0 ef ]
 "695 ./usb_device_cdc.h
 [; ;./usb_device_cdc.h: 695: void putUSBUSART(uint8_t *data, uint8_t Length);
@@ -680,154 +664,182 @@ Version 4.0 HI-TECH Software Intermediate Code
 "5
 [; ;./main.h: 5: static unsigned char usbWriteBuffer[32];
 [v _usbWriteBuffer `uc ~T0 @X0 -> 32 `i s ]
+"7 main.c
+[; ;main.c: 7: unsigned char readButtonAsm(void);
+[p x FOSC = HSPLL_HS ]
+"8
+[; ;main.c: 8: 
+[p x PLLDIV = 2 ]
+"9
+[; ;main.c: 9: void main(void) {
+[p x CPUDIV = OSC1_PLL2 ]
+"10
+[; ;main.c: 10: 
+[p x USBDIV = 2 ]
+"11
+[; ;main.c: 11:     TRISC = 0x00;
+[p x WDT = OFF  LVP = OFF  MCLRE = ON ]
 [v $root$_main `(v ~T0 @X0 0 e ]
-"14 main.c
-[; ;main.c: 14: void main(void) {
+"22
+[; ;main.c: 22: 
 [v _main `(v ~T0 @X0 1 ef ]
 {
 [e :U _main ]
 [f ]
-"16
-[; ;main.c: 16:     TRISC = 0x00;
+"24
+[; ;main.c: 24:             unsigned char btn_state = readButtonAsm();
 [e = _TRISC -> -> 0 `i `uc ]
-"17
-[; ;main.c: 17:     LATC = 0x00;
+"25
+[; ;main.c: 25:             if (btn_state) {
 [e = _LATC -> -> 0 `i `uc ]
-"18
-[; ;main.c: 18:     TRISDbits.TRISD0 = 1;
+"26
+[; ;main.c: 26:                 LATCbits.LATC0 = 1;
 [e = . . _TRISDbits 0 0 -> -> 1 `i `uc ]
-"21
-[; ;main.c: 21:     initUSBLib();
+"29
+[; ;main.c: 29:                 while(readButtonAsm());
 [e ( _initUSBLib ..  ]
-"23
-[; ;main.c: 23:     while(1) {
+"31
+[; ;main.c: 31:             }
 [e :U 436 ]
 {
-"24
-[; ;main.c: 24:         USBDeviceTasks();
+"33
+[; ;main.c: 33:     }
 [e ( _USBDeviceTasks ..  ]
-"27
-[; ;main.c: 27:         if (isUSBReady()) {
+"36
+[; ;main.c: 36: 
 [e $ ! != -> ( _isUSBReady ..  `i -> 0 `i 438  ]
 {
-"28
-[; ;main.c: 28:             if (PORTDbits.RD0) {
-[e $ ! != -> . . _PORTDbits 0 0 `i -> 0 `i 439  ]
+"37
+[; ;main.c: 37: void sendFlap(void) {
+[v _btn_state `uc ~T0 @X0 1 a ]
+[e = _btn_state ( _readButtonAsm ..  ]
+"38
+[; ;main.c: 38:     char msg[] = "FLAP\r\n";
+[e $ ! != -> _btn_state `i -> 0 `i 439  ]
 {
-"29
-[; ;main.c: 29:                 LATCbits.LATC0 = 1;
+"39
+[; ;main.c: 39:     putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
 [e = . . _LATCbits 0 0 -> -> 1 `i `uc ]
-"30
-[; ;main.c: 30:                 sendFlap();
+"40
+[; ;main.c: 40:     CDCTxService();
 [e ( _sendFlap ..  ]
-"31
-[; ;main.c: 31:                 debounceDelay();
+"41
+[; ;main.c: 41: }
 [e ( _debounceDelay ..  ]
-"32
-[; ;main.c: 32:                 while(PORTDbits.RD0);
+"42
+[; ;main.c: 42: 
 [e $U 440  ]
 [e :U 441 ]
 [e :U 440 ]
-[e $ != -> . . _PORTDbits 0 0 `i -> 0 `i 441  ]
+[e $ != -> ( _readButtonAsm ..  `i -> 0 `i 441  ]
 [e :U 442 ]
-"33
-[; ;main.c: 33:                 LATCbits.LATC0 = 0;
+"43
+[; ;main.c: 43: unsigned char result;
 [e = . . _LATCbits 0 0 -> -> 0 `i `uc ]
-"34
-[; ;main.c: 34:             }
+"44
+[; ;main.c: 44: 
 }
 [e :U 439 ]
-"35
-[; ;main.c: 35:         }
+"45
+[; ;main.c: 45: unsigned char readButtonAsm(void) {
 }
 [e :U 438 ]
-"36
-[; ;main.c: 36:     }
+"46
+[; ;main.c: 46:     __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n");
 }
 [e :U 435 ]
 [e $U 436  ]
 [e :U 437 ]
-"37
-[; ;main.c: 37: }
+"47
 [e :UE 434 ]
 }
-"40
-[; ;main.c: 40: void sendFlap(void) {
+"50
 [v _sendFlap `(v ~T0 @X0 1 ef ]
 {
 [e :U _sendFlap ]
 [f ]
-[v F3956 `uc ~T0 @X0 -> 7 `i s ]
-[i F3956
+[v F3958 `uc ~T0 @X0 -> 7 `i s ]
+[i F3958
 :U ..
-"41
-[; ;main.c: 41:     char msg[] = "flap\r\n";
--> 102 `c
--> 108 `c
--> 97 `c
--> 112 `c
+"51
+-> 70 `c
+-> 76 `c
+-> 65 `c
+-> 80 `c
 -> 13 `c
 -> 10 `c
 -> 0 `c
 ..
 ]
 [v _msg `uc ~T0 @X0 -> 7 `i a ]
-[e = _msg F3956 ]
-"42
-[; ;main.c: 42:     putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+[e = _msg F3958 ]
+"52
 [e ( _putUSBUSART (2 , -> &U _msg `*uc -> - -> # _msg `ui -> -> 1 `i `ui `uc ]
-"43
-[; ;main.c: 43:     CDCTxService();
+"53
 [e ( _CDCTxService ..  ]
-"44
-[; ;main.c: 44: }
+"54
 [e :UE 443 ]
 }
-"47
-[; ;main.c: 47: void debounceDelay(void) {
+"56
+[v _result `uc ~T0 @X0 1 e ]
+"58
+[v _readButtonAsm `(uc ~T0 @X0 1 ef ]
+{
+[e :U _readButtonAsm ]
+[f ]
+"59
+[; <" movlw 0x01 ;# ">
+[; <" btfss PORTD, 0 ;# ">
+[; <" movlw 0x00 ;# ">
+"69
+[; ;main.c: 69: }
+[e :UE 444 ]
+}
+"72
+[; ;main.c: 72: void debounceDelay(void) {
 [v _debounceDelay `(v ~T0 @X0 1 ef ]
 {
 [e :U _debounceDelay ]
 [f ]
-"48
-[; ;main.c: 48:     for (volatile int i=0; i<255; i++)
+"73
+[; ;main.c: 73:     for (volatile int i=0; i<255; i++)
 {
 [v _i `Vi ~T0 @X0 1 a ]
 [e = _i -> 0 `i ]
-[e $ < _i -> 255 `i 445  ]
-[e $U 446  ]
-[e :U 445 ]
-"49
-[; ;main.c: 49:         for (volatile int j=0; j<255; j++);
+[e $ < _i -> 255 `i 446  ]
+[e $U 447  ]
+[e :U 446 ]
+"74
+[; ;main.c: 74:         for (volatile int j=0; j<255; j++);
 {
 [v _j `Vi ~T0 @X0 1 a ]
 [e = _j -> 0 `i ]
-[e $ < _j -> 255 `i 448  ]
-[e $U 449  ]
-[e :U 448 ]
-[e ++ _j -> -> 1 `i `Vi ]
-[e $ < _j -> 255 `i 448  ]
+[e $ < _j -> 255 `i 449  ]
+[e $U 450  ]
 [e :U 449 ]
+[e ++ _j -> -> 1 `i `Vi ]
+[e $ < _j -> 255 `i 449  ]
+[e :U 450 ]
 }
 [e ++ _i -> -> 1 `i `Vi ]
-[e $ < _i -> 255 `i 445  ]
-[e :U 446 ]
+[e $ < _i -> 255 `i 446  ]
+[e :U 447 ]
 }
-"50
-[; ;main.c: 50: }
-[e :UE 444 ]
+"75
+[; ;main.c: 75: }
+[e :UE 445 ]
 }
 [v $root$_mainISR `(v ~T0 @X0 0 e ]
-"53
-[; ;main.c: 53: void __attribute__((picinterrupt(("")))) mainISR(void) {
+"78
+[; ;main.c: 78: void __attribute__((picinterrupt(("")))) mainISR(void) {
 [v _mainISR `(v ~T36 @X0 1 ef ]
 {
 [e :U _mainISR ]
 [f ]
-"54
-[; ;main.c: 54:     processUSBTasks();
+"79
+[; ;main.c: 79:     processUSBTasks();
 [e ( _processUSBTasks ..  ]
-"55
-[; ;main.c: 55: }
-[e :UE 451 ]
+"80
+[; ;main.c: 80: }
+[e :UE 452 ]
 }

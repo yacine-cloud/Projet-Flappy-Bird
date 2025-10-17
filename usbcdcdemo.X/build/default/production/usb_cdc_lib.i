@@ -6737,13 +6737,15 @@ extern LINE_CODING line_coding;
 
 extern volatile CTRL_TRF_SETUP SetupPkt;
 extern const uint8_t configDescriptor1[];
-# 14 "./usb_cdc_lib.h" 2
+# 13 "./usb_cdc_lib.h" 2
+
 
 void initUSBLib(void);
 unsigned char isUSBReady(void);
 
 __attribute__((inline)) void processUSBTasks(void);
-# 2 "usb_cdc_lib.c" 2
+# 1 "usb_cdc_lib.c" 2
+
 
 
 
@@ -6779,7 +6781,8 @@ extern __bit kbhit(void);
 
 extern char * cgets(char *);
 extern void cputs(const char *);
-# 7 "usb_cdc_lib.c" 2
+# 6 "usb_cdc_lib.c" 2
+
 
 
 

@@ -5618,7 +5618,8 @@ extern __attribute__((nonreentrant)) void _delaywdt(unsigned long);
 #pragma intrinsic(_delay3)
 extern __attribute__((nonreentrant)) void _delay3(unsigned char);
 # 32 "C:\\Program Files (x86)\\Microchip\\xc8\\v2.10\\pic\\include\\xc.h" 2 3
-# 2 "main.c" 2
+# 1 "main.c" 2
+
 # 1 "./sysconfig.h" 1
 
 
@@ -5684,7 +5685,8 @@ extern __attribute__((nonreentrant)) void _delay3(unsigned char);
 
 
 #pragma config EBTRB = OFF
-# 3 "main.c" 2
+# 2 "main.c" 2
+
 # 1 "./usb_cdc_lib.h" 1
 
 
@@ -6791,20 +6793,30 @@ extern LINE_CODING line_coding;
 
 extern volatile CTRL_TRF_SETUP SetupPkt;
 extern const uint8_t configDescriptor1[];
-# 14 "./usb_cdc_lib.h" 2
+# 13 "./usb_cdc_lib.h" 2
+
 
 void initUSBLib(void);
 unsigned char isUSBReady(void);
 
 __attribute__((inline)) void processUSBTasks(void);
-# 4 "main.c" 2
+# 3 "main.c" 2
+
 # 1 "./main.h" 1
 
 
 
 static unsigned char usbReadBuffer[32];
 static unsigned char usbWriteBuffer[32];
-# 5 "main.c" 2
+# 4 "main.c" 2
+
+
+
+#pragma config FOSC = HSPLL_HS
+#pragma config PLLDIV = 2
+#pragma config CPUDIV = OSC1_PLL2
+#pragma config USBDIV = 2
+#pragma config WDT = OFF, LVP = OFF, MCLRE = ON
 
 
 
@@ -6813,6 +6825,7 @@ static unsigned char usbWriteBuffer[32];
 
 void debounceDelay(void);
 void sendFlap(void);
+unsigned char readButtonAsm(void);
 
 void main(void) {
 
@@ -6824,15 +6837,17 @@ void main(void) {
     initUSBLib();
 
     while(1) {
+
         USBDeviceTasks();
 
 
         if (isUSBReady()) {
-            if (PORTDbits.RD0) {
+            unsigned char btn_state = readButtonAsm();
+            if (btn_state) {
                 LATCbits.LATC0 = 1;
                 sendFlap();
                 debounceDelay();
-                while(PORTDbits.RD0);
+                while(readButtonAsm());
                 LATCbits.LATC0 = 0;
             }
         }
@@ -6841,9 +6856,16 @@ void main(void) {
 
 
 void sendFlap(void) {
-    char msg[] = "flap\r\n";
+    char msg[] = "FLAP\r\n";
     putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
     CDCTxService();
+}
+
+unsigned char result;
+
+unsigned char readButtonAsm(void) {
+    __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n");
+# 69 "main.c"
 }
 
 

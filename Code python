@@ -1,9 +1,31 @@
 #gui.py
+import threading
+import serial
 import tkinter as tk
 import random
 from PIL import Image, ImageTk  # Pour redimensionner l'image
 
 class FlappyGUI:
+def init_serial_thread(self):
+    """Initialise le port série et démarre un thread pour lire le PIC"""
+    try:
+        self.ser = serial.Serial('COM5', 9600, timeout=0.1)
+    except serial.SerialException:
+        print("Erreur : impossible d'ouvrir le port série COM5")
+        return
+    
+    thread = threading.Thread(target=self.read_pic, daemon=True)
+    thread.start()
+
+   def read_pic(self):
+    """Boucle pour lire les commandes du PIC"""
+    while True:
+        if self.ser.in_waiting:
+            data = self.ser.readline().decode().strip()
+            if data == "FLAP":
+                # Appeler la fonction on_space_press dans le thread principal Tkinter
+                self.root.after(0, self.on_space_press, None)
+
     def __init__(self, root, start_callback=None):
         """Interface principale du jeu Flappy Bird"""
         self.root = root

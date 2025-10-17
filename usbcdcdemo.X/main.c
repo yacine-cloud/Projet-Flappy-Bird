@@ -58,9 +58,9 @@ unsigned char result;
 unsigned char readButtonAsm(void) {
     asm(
         "movlw 0x01\n"      // result = 0 par défaut
-        "btfss PORTD, 0\n"     // skip next if RD0 = 1
-                 // bouton pressé ? 1
+        "btfss PORTD, 0\n"     // skip next if RD0 = 1         // bouton pressé ? 1
         "movlw 0x00\n" 
+        "return\n"
        
        
         // Bouton non pressé ? result = 0

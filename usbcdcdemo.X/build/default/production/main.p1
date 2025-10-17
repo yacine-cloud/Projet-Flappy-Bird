@@ -745,7 +745,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 }
 [e :U 438 ]
 "46
-[; ;main.c: 46:     __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n");
+[; ;main.c: 46:     __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n" "return\n");
 }
 [e :U 435 ]
 [e $U 436  ]
@@ -791,6 +791,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [; <" movlw 0x01 ;# ">
 [; <" btfss PORTD, 0 ;# ">
 [; <" movlw 0x00 ;# ">
+[; <" return ;# ">
 "69
 [; ;main.c: 69: }
 [e :UE 444 ]

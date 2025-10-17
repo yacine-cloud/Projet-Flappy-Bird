@@ -5,7 +5,7 @@ Linker command line:
 -W-3 --edf=C:\Program Files (x86)\Microchip\xc8\v2.10\pic\dat\en_msgs.txt \
   -cs -h+dist/default/production\usbcdcdemo.X.production.sym \
   --cmf=dist/default/production\usbcdcdemo.X.production.cmf -z -Q18F4550 \
-  -oC:\Users\bouci\AppData\Local\Temp\sdfo.2 --defsym=__MPLAB_BUILD=1 \
+  -oC:\Users\bouci\AppData\Local\Temp\s2v0.2 --defsym=__MPLAB_BUILD=1 \
   -Mdist/default/production/usbcdcdemo.X.production.map -E1 -ver=XC8 \
   --acfsm=1493 -ASTACK=0106h-03FFh -pstack=STACK -ACODE=00h-07FFFh \
   -ACONST=00h-07FFFh -ASMALLCONST=0800h-08FFhx120 \
@@ -23,7 +23,7 @@ Linker command line:
   -pfarbss=FARRAM,fardata=FARRAM,nvFARRAM=FARRAM \
   -pintsave_regs=BIGRAM,bigbss=BIGRAM,bigdata=BIGRAM -pbss=RAM \
   -pidata=CODE,irdata=CODE,ibigdata=CODE,ifardata=CODE -prparam=COMRAM \
-  C:\Users\bouci\AppData\Local\Temp\sdfo.o \
+  C:\Users\bouci\AppData\Local\Temp\s2v0.o \
   dist/default/production\usbcdcdemo.X.production.o 
 
 Object code version is 3.11
@@ -36,7 +36,7 @@ Call graph: (short form)
 
 
                 Name                               Link     Load   Length Selector   Space Scale
-C:\Users\bouci\AppData\Local\Temp\sdfo.o
+C:\Users\bouci\AppData\Local\Temp\s2v0.o
                 init                                  E        E        4        4       0
                 reset_vec                             0        0        4        0       0
                 idloc                            200000   200000        8   200000       0
@@ -107,7 +107,7 @@ dist/default/production\usbcdcdemo.X.production.o
                 text7                              3EF2     3EF2       42      455       0
                 text6                              4138     4138        E      455       0
                 text5                              3FB6     3FB6       38      455       0
-                text4                              4146     4146        8      455       0
+                text4                              4146     4146        A      455       0
                 text3                              13CE     13CE      198      455       0
                 text2                              40E2     40E2       2C      455       0
                 text1                              410E     410E       2A      455       0
@@ -119,7 +119,7 @@ dist/default/production\usbcdcdemo.X.production.o
                 bssBANK0                             60       60       7F       60       1
                 bssCOMRAM                             1        1       2A        1       1
                 cinit                              3EAC     3EAC       46      455       0
-                idataBANK0                         414E     414E        7      455       0
+                idataBANK0                         4150     4150        7      455       0
 
 TOTAL           Name                               Link     Load   Length     Space
         CLASS   STACK          
@@ -190,13 +190,13 @@ TOTAL           Name                               Link     Load   Length     Sp
                 text7                              3EF2     3EF2       42         0
                 text6                              4138     4138        E         0
                 text5                              3FB6     3FB6       38         0
-                text4                              4146     4146        8         0
+                text4                              4146     4146        A         0
                 text3                              13CE     13CE      198         0
                 text2                              40E2     40E2       2C         0
                 text1                              410E     410E       2A         0
                 text0                              3B26     3B26       66         0
                 cinit                              3EAC     3EAC       46         0
-                idataBANK0                         414E     414E        7         0
+                idataBANK0                         4150     4150        7         0
 
         CLASS   CONST          
 
@@ -261,7 +261,7 @@ SEGMENTS        Name                           Load    Length   Top    Selector 
                 bssBANK0                       000060  0000A0  000100        60       1  BANK0   
                 cstackBANK1                    000100  000006  000106       100       1  BANK1   
                 smallconst                     000800  0000AA  0008AA       400       0  SMALLCON
-                text25                         0008AA  0038AB  004155       455       0  CODE    
+                text25                         0008AA  0038AD  004157       455       0  CODE    
                 idloc                          200000  000008  200008    200000       0  IDLOC   
                 config                         300000  00000E  30000E    300000       0  CONFIG  
 
@@ -284,19 +284,19 @@ UNUSED ADDRESS RANGES
                          000580-0007FF              280
         CODE             000004-000007                4
                          000012-0007FF              7EE
-                         004155-007FFF             3EAB
+                         004157-007FFF             3EA9
         COMRAM           000055-00005F                B
         CONST            000004-000007                4
                          000012-0007FF              7EE
-                         004155-007FFF             3EAB
+                         004157-007FFF             3EA9
         EEDATA           F00000-F000FF              100
-        MEDIUMCONST      004155-007FFF             3EAB
+        MEDIUMCONST      004157-007FFF             3EA9
         RAM              000106-0003FF              100
                          000438-00044F               18
                          000470-0004FF               90
                          000580-0007FF              100
         SFR              000F60-000FFF               A0
-        SMALLCONST       004155-007FFF              100
+        SMALLCONST       004157-007FFF              100
         STACK            000106-0003FF              2FA
 
                                   Symbol Table
@@ -753,7 +753,7 @@ __end_of_memcpy                             text16       003E10
 __end_of_memset                             text22       0016DE
 __end_of_processUSBTasks                    text38       004086
 __end_of_putUSBUSART                        text2        00410E
-__end_of_readButtonAsm                      text4        00414E
+__end_of_readButtonAsm                      text4        004150
 __end_of_sd000                              smallconst   0008A8
 __end_of_sd001                              smallconst   000872
 __end_of_sd002                              smallconst   000892
@@ -795,7 +795,7 @@ __pcstackBANK0                              cstackBANK0  0000DF
 __pcstackBANK1                              cstackBANK1  000100
 __pcstackCOMRAM                             cstackCOMRAM 00002B
 __pdataBANK0                                dataBANK0    0000F9
-__pidataBANK0                               idataBANK0   00414E
+__pidataBANK0                               idataBANK0   004150
 __pintcode                                  intcode      000008
 __pintcode_body                             intcode_body 003D10
 __psmallconst                               smallconst   000800
@@ -3327,8 +3327,8 @@ main.c
 		_debounceDelay 		CODE           	3BF0	0000	97
 		_main          		CODE           	3B26	0000	103
 		_sendFlap      		CODE           	410E	0000	43
-		_readButtonAsm 		CODE           	4146	0000	9
+		_readButtonAsm 		CODE           	4146	0000	11
 		_mainISR       		CODE           	0008	0000	97
 
-main.c estimated size: 349
+main.c estimated size: 351
 

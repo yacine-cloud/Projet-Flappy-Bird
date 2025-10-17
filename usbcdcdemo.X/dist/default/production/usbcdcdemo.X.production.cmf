@@ -11,7 +11,7 @@
 # All addresses and the length are given in unqualified hexadecimal
 # in delta units.  Any other numeric values are decimal.
 %PSECTS
-$C:\Users\bouci\AppData\Local\Temp\sdfo.o
+$C:\Users\bouci\AppData\Local\Temp\s2v0.o
 idloc IDLOC 0 200000 200000 8 1
 init CODE 0 E E 4 1
 reset_vec CODE 0 0 0 4 1
@@ -23,7 +23,7 @@ text0 CODE 0 3B26 3B26 66 1
 text1 CODE 0 410E 410E 2A 1
 text2 CODE 0 40E2 40E2 2C 1
 text3 CODE 0 13CE 13CE 198 1
-text4 CODE 0 4146 4146 8 1
+text4 CODE 0 4146 4146 A 1
 text5 CODE 0 3FB6 3FB6 38 1
 text6 CODE 0 4138 4138 E 1
 text7 CODE 0 3EF2 3EF2 42 1
@@ -92,7 +92,7 @@ temp COMRAM 1 54 54 1 1
 bssBANK0 BANK0 1 60 60 7F 1
 intcode CODE 0 8 8 6 1
 smallconst SMALLCONST 0 800 800 AA 1
-idataBANK0 CODE 0 414E 414E 7 1
+idataBANK0 CODE 0 4150 4150 7 1
 dataBANK0 BANK0 1 F9 F9 7 1
 bssCOMRAM COMRAM 1 1 1 2A 1
 # %UNUSED Section
@@ -116,12 +116,12 @@ BANK6 600-6FF 1
 BANK7 700-7FF 1
 CONST 4-7 1
 CONST 12-7FF 1
-CONST 4155-7FFF 1
+CONST 4157-7FFF 1
 STACK 106-3FF 1
-SMALLCONST 4155-7FFF 1
+SMALLCONST 4157-7FFF 1
 CODE 4-7 1
 CODE 12-7FF 1
-CODE 4155-7FFF 1
+CODE 4157-7FFF 1
 BIGRAM 55-5F 1
 BIGRAM 106-3FF 1
 BIGRAM 438-44F 1
@@ -129,7 +129,7 @@ BIGRAM 470-4FF 1
 BIGRAM 580-7FF 1
 COMRAM 55-5F 1
 EEDATA F00000-F000FF 1
-MEDIUMCONST 4155-7FFF 1
+MEDIUMCONST 4157-7FFF 1
 # %LINETAB Section
 # This section enumerates the file/line to address mappings.
 # The beginning of the section is indicated by %LINETAB.
@@ -144,7 +144,7 @@ MEDIUMCONST 4155-7FFF 1
 # All other numeric values are in decimal.
 %LINETAB
 $dist/default/production\usbcdcdemo.X.production.o
-8 intcode CODE >11983:C:\Users\bouci\AppData\Local\Temp\sdfo.s
+8 intcode CODE >11985:C:\Users\bouci\AppData\Local\Temp\s2v0.s
 8 intcode CODE >78:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
 2890 text66 CODE >1777:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_device.c
 2890 text66 CODE >1783:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_device.c
@@ -1360,7 +1360,7 @@ FFE text9 CODE >687:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\mic
 3FEC text5 CODE >34:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_cdc_lib.c
 4146 text4 CODE >58:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
 4146 text4 CODE >59:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
-414C text4 CODE >69:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
+414E text4 CODE >69:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
 13CE text3 CODE >836:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_device_cdc.c
 13CE text3 CODE >841:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_device_cdc.c
 13D0 text3 CODE >845:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\usb_device_cdc.c
@@ -1426,42 +1426,42 @@ FFE text9 CODE >687:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\mic
 3B6A text0 CODE >41:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
 3B6E text0 CODE >42:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
 3B82 text0 CODE >43:C:\Users\bouci\OneDrive - Groupe INSEEC (POCE)\ECE\inge4\microcontrollers\Projet-Flappy-Bird\usbcdcdemo.X\main.c
-3EAC cinit CODE >2624:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EAC cinit CODE >2626:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EAC cinit CODE >2629:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EAC cinit CODE >2779:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EAE cinit CODE >2780:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EB0 cinit CODE >2781:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EB2 cinit CODE >2782:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EB4 cinit CODE >2783:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EB6 cinit CODE >2784:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EB8 cinit CODE >2785:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EBC cinit CODE >2786:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EC0 cinit CODE >2787:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EC0 cinit CODE >2788:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EC2 cinit CODE >2789:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EC6 cinit CODE >2790:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EC8 cinit CODE >2791:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ECA cinit CODE >2792:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ECC cinit CODE >2796:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED0 cinit CODE >2797:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED2 cinit CODE >2798:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED2 cinit CODE >2799:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED4 cinit CODE >2800:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED6 cinit CODE >2801:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3ED8 cinit CODE >2804:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EDC cinit CODE >2805:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EDE cinit CODE >2806:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EDE cinit CODE >2807:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE0 cinit CODE >2808:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE2 cinit CODE >2809:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE4 cinit CODE >2815:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE4 cinit CODE >2817:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE6 cinit CODE >2818:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EE8 cinit CODE >2820:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EEA cinit CODE >2821:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EEC cinit CODE >2822:C:\Users\bouci\AppData\Local\Temp\sdfo.s
-3EEE cinit CODE >2823:C:\Users\bouci\AppData\Local\Temp\sdfo.s
+3EAC cinit CODE >2624:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EAC cinit CODE >2626:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EAC cinit CODE >2629:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EAC cinit CODE >2779:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EAE cinit CODE >2780:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EB0 cinit CODE >2781:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EB2 cinit CODE >2782:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EB4 cinit CODE >2783:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EB6 cinit CODE >2784:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EB8 cinit CODE >2785:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EBC cinit CODE >2786:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EC0 cinit CODE >2787:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EC0 cinit CODE >2788:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EC2 cinit CODE >2789:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EC6 cinit CODE >2790:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EC8 cinit CODE >2791:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ECA cinit CODE >2792:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ECC cinit CODE >2796:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED0 cinit CODE >2797:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED2 cinit CODE >2798:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED2 cinit CODE >2799:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED4 cinit CODE >2800:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED6 cinit CODE >2801:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3ED8 cinit CODE >2804:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EDC cinit CODE >2805:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EDE cinit CODE >2806:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EDE cinit CODE >2807:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE0 cinit CODE >2808:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE2 cinit CODE >2809:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE4 cinit CODE >2815:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE4 cinit CODE >2817:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE6 cinit CODE >2818:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EE8 cinit CODE >2820:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EEA cinit CODE >2821:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EEC cinit CODE >2822:C:\Users\bouci\AppData\Local\Temp\s2v0.s
+3EEE cinit CODE >2823:C:\Users\bouci\AppData\Local\Temp\s2v0.s
 # %SYMTAB Section
 # An enumeration of all symbols in the program.
 # The beginning of the section is indicated by %SYMTAB.
@@ -1490,7 +1490,7 @@ USBTransferOnePacket@len E2 0 BANK0 1 cstackBANK0 dist/default/production\usbcdc
 __end_ofi2_USBStdFeatureReqHandler F78 0 CODE 0 text55 dist/default/production\usbcdcdemo.X.production.o
 __Hibigdata 0 0 CODE 0 ibigdata dist/default/production\usbcdcdemo.X.production.o
 i2_USBDeviceTasks 11A6 0 CODE 0 text39 dist/default/production\usbcdcdemo.X.production.o
-__mediumconst 0 0 MEDIUMCONST 0 mediumconst C:\Users\bouci\AppData\Local\Temp\sdfo.o
+__mediumconst 0 0 MEDIUMCONST 0 mediumconst C:\Users\bouci\AppData\Local\Temp\s2v0.o
 __size_of_USBCtrlEPServiceComplete 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __Heeprom_data 0 0 EEDATA 0 eeprom_data dist/default/production\usbcdcdemo.X.production.o
 __end_of_USBStdSetCfgHandler 3290 0 CODE 0 text21 dist/default/production\usbcdcdemo.X.production.o
@@ -1502,7 +1502,7 @@ __size_of_USBIncrement1msInternalTimers 0 0 ABS 0 - dist/default/production\usbc
 _CDCTxService 13CE 0 CODE 0 text3 dist/default/production\usbcdcdemo.X.production.o
 i2_CDCInitEP 3B8C 0 CODE 0 text58 dist/default/production\usbcdcdemo.X.production.o
 __Lsmallconst 800 0 SMALLCONST 0 smallconst dist/default/production\usbcdcdemo.X.production.o
-__end_of_readButtonAsm 414E 0 CODE 0 text4 dist/default/production\usbcdcdemo.X.production.o
+__end_of_readButtonAsm 4150 0 CODE 0 text4 dist/default/production\usbcdcdemo.X.production.o
 _LATC F8B 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _UCFG F6F 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _UCON F6D 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
@@ -1510,7 +1510,7 @@ _UEIE F6B 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _UEIR F6A 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _UEP0 F70 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _UEP1 F71 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
-___sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\sdfo.o
+___sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\s2v0.o
 _main 3B26 0 CODE 0 text0 dist/default/production\usbcdcdemo.X.production.o
 _pDst C2 0 BANK0 1 bssBANK0 dist/default/production\usbcdcdemo.X.production.o
 i2USBStdSetCfgHandler@i 3F 0 COMRAM 1 cstackCOMRAM dist/default/production\usbcdcdemo.X.production.o
@@ -1518,7 +1518,7 @@ btemp 54 0 COMRAM 1 temp dist/default/production\usbcdcdemo.X.production.o
 __size_ofi2_USBConfigureEndpoint 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __end_ofi2_USBCtrlTrfInHandler 2DBE 0 CODE 0 text65 dist/default/production\usbcdcdemo.X.production.o
 __size_of_USBCtrlTrfTxService 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
-start E 0 CODE 0 init C:\Users\bouci\AppData\Local\Temp\sdfo.o
+start E 0 CODE 0 init C:\Users\bouci\AppData\Local\Temp\s2v0.o
 __size_ofi2_USBCtrlTrfSetupHandler 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 _USBTransferOnePacket 203E 0 CODE 0 text29 dist/default/production\usbcdcdemo.X.production.o
 __size_of_main 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
@@ -1545,11 +1545,11 @@ ttemp5 55 0 COMRAM 1 temp dist/default/production\usbcdcdemo.X.production.o
 ttemp6 58 0 COMRAM 1 temp dist/default/production\usbcdcdemo.X.production.o
 ttemp7 5C 0 COMRAM 1 temp dist/default/production\usbcdcdemo.X.production.o
 i2_USBEnableEndpoint 3E60 0 CODE 0 text60 dist/default/production\usbcdcdemo.X.production.o
-__accesstop 60 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\sdfo.o
-intlevel0 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\sdfo.o
-intlevel1 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\sdfo.o
-intlevel2 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\sdfo.o
-intlevel3 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\sdfo.o
+__accesstop 60 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\s2v0.o
+intlevel0 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\s2v0.o
+intlevel1 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\s2v0.o
+intlevel2 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\s2v0.o
+intlevel3 0 0 CODE 0 text C:\Users\bouci\AppData\Local\Temp\s2v0.o
 __LbssCOMRAM 0 0 ABS 0 bssCOMRAM dist/default/production\usbcdcdemo.X.production.o
 __CFG_USBDIV$2 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __size_of_initUSBLib 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
@@ -1584,9 +1584,9 @@ __end_ofi2_USBCtrlEPServiceComplete 22C2 0 CODE 0 text48 dist/default/production
 _line_coding D5 0 BANK0 1 bssBANK0 dist/default/production\usbcdcdemo.X.production.o
 __size_ofi2_USBCtrlTrfRxService 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 i2USBCtrlTrfTxService@byteToSend 2B 0 COMRAM 1 cstackCOMRAM dist/default/production\usbcdcdemo.X.production.o
-___inthi_sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\sdfo.o
+___inthi_sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\s2v0.o
 i2USBStdFeatureReqHandler@p 44 0 COMRAM 1 cstackCOMRAM dist/default/production\usbcdcdemo.X.production.o
-___intlo_sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\sdfo.o
+___intlo_sp 0 0 STACK 2 stack C:\Users\bouci\AppData\Local\Temp\s2v0.o
 __size_ofi2_USBSuspend 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __end_ofi2_USBDeviceTasks 13CE 0 CODE 0 text39 dist/default/production\usbcdcdemo.X.production.o
 __end_ofi2_USBCtrlEPAllowDataStage 36F6 0 CODE 0 text49 dist/default/production\usbcdcdemo.X.production.o
@@ -1699,7 +1699,7 @@ _USBCtrlEPService 3376 0 CODE 0 text15 dist/default/production\usbcdcdemo.X.prod
 __size_of_USBCtrlEPAllowStatusStage 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __Hbigbss 0 0 BIGRAM 1 bigbss dist/default/production\usbcdcdemo.X.production.o
 __Hbigram 0 0 ABS 0 bigram dist/default/production\usbcdcdemo.X.production.o
-__smallconst 800 0 SMALLCONST 0 smallconst C:\Users\bouci\AppData\Local\Temp\sdfo.o
+__smallconst 800 0 SMALLCONST 0 smallconst C:\Users\bouci\AppData\Local\Temp\s2v0.o
 _USBCheckStdRequest 2542 0 CODE 0 text20 dist/default/production\usbcdcdemo.X.production.o
 _isUSBReady 3FB6 0 CODE 0 text5 dist/default/production\usbcdcdemo.X.production.o
 _USBIncrement1msInternalTimers 3FEE 0 CODE 0 text13 dist/default/production\usbcdcdemo.X.production.o
@@ -1997,8 +1997,8 @@ USBEnableEndpoint@p E8 0 BANK0 1 cstackBANK0 dist/default/production\usbcdcdemo.
 _dummy_encapsulated_cmd_response CD 0 BANK0 1 bssBANK0 dist/default/production\usbcdcdemo.X.production.o
 __CFG_CCP2MX$ON 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 putUSBUSART@length E1 0 BANK0 1 cstackBANK0 dist/default/production\usbcdcdemo.X.production.o
-stackhi 3FF 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\sdfo.o
-stacklo 106 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\sdfo.o
+stackhi 3FF 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\s2v0.o
+stacklo 106 0 ABS 0 - C:\Users\bouci\AppData\Local\Temp\s2v0.o
 _cdc_mem_type C5 0 BANK0 1 bssBANK0 dist/default/production\usbcdcdemo.X.production.o
 __end_of_USBConfigureEndpoint 359A 0 CODE 0 text31 dist/default/production\usbcdcdemo.X.production.o
 _USBCtrlEPAllowDataStage 359A 0 CODE 0 text19 dist/default/production\usbcdcdemo.X.production.o
@@ -2139,7 +2139,7 @@ __Ltext65 0 0 ABS 0 text65 dist/default/production\usbcdcdemo.X.production.o
 __Ltext66 0 0 ABS 0 text66 dist/default/production\usbcdcdemo.X.production.o
 __end_of_USBCheckCDCRequest 2CBA 0 CODE 0 text27 dist/default/production\usbcdcdemo.X.production.o
 __end_of_USBCtrlTrfInHandler 2BB6 0 CODE 0 text35 dist/default/production\usbcdcdemo.X.production.o
-__ramtop 800 0 RAM 0 ramtop C:\Users\bouci\AppData\Local\Temp\sdfo.o
+__ramtop 800 0 RAM 0 ramtop C:\Users\bouci\AppData\Local\Temp\s2v0.o
 _CDCInitEP 3ABE 0 CODE 0 text28 dist/default/production\usbcdcdemo.X.production.o
 _USBCtrlEPServiceComplete 1EFC 0 CODE 0 text18 dist/default/production\usbcdcdemo.X.production.o
 __Lpowerup E 0 CODE 0 powerup dist/default/production\usbcdcdemo.X.production.o
@@ -2172,7 +2172,7 @@ __Libigdata 0 0 CODE 0 ibigdata dist/default/production\usbcdcdemo.X.production.
 __CFG_WRTC$OFF 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __CFG_WRTD$OFF 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 __size_of_USBWakeFromSuspend 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
-__pidataBANK0 414E 0 CODE 0 idataBANK0 dist/default/production\usbcdcdemo.X.production.o
+__pidataBANK0 4150 0 CODE 0 idataBANK0 dist/default/production\usbcdcdemo.X.production.o
 __size_ofi2_USBDeviceInit 0 0 ABS 0 - dist/default/production\usbcdcdemo.X.production.o
 USBCtrlTrfTxService@byteToSend DF 0 BANK0 1 cstackBANK0 dist/default/production\usbcdcdemo.X.production.o
 _USTATcopy DE 0 BANK0 1 bssBANK0 dist/default/production\usbcdcdemo.X.production.o
@@ -2277,7 +2277,7 @@ _BDT 1 400 30
 # All other numeric quantities are in decimal.
 %SEGMENTS
 idloc 0 200000 200000 8 1
-text25 0 8AA 8AA 38AB 1
+text25 0 8AA 8AA 38AD 1
 cstackBANK1 1 100 100 6 1
 reset_vec 0 0 0 4 1
 bssBANK0 1 60 60 A0 1

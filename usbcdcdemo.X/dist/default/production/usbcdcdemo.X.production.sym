@@ -423,7 +423,7 @@ __LidataBANK0 0 0 ABS 0
 _USER_USB_CALLBACK_EVENT_HANDLER 38C4 0 CODE 0
 _shortPacketStatus 28 0 COMRAM 1
 i2_USBCtrlEPAllowStatusStage 30B2 0 CODE 0
-__pidataBANK0 414E 0 CODE 0
+__pidataBANK0 4150 0 CODE 0
 __end_of_USBCtrlTrfRxService 1EFC 0 CODE 0
 __end_of_USBCtrlTrfTxService 2890 0 CODE 0
 __end_of_initUSBLib 4146 0 CODE 0
@@ -660,7 +660,7 @@ _pBDTEntryIn F 0 COMRAM 1
 __size_ofi2_memset 0 0 ABS 0
 _BaudRateGen B0 0 BANK0 1
 memset@dest DF 0 BANK0 1
-__end_of_readButtonAsm 414E 0 CODE 0
+__end_of_readButtonAsm 4150 0 CODE 0
 i2USBCtrlTrfTxService@byteToSend 2B 0 COMRAM 1
 i2_USBDeviceTasks 11A6 0 CODE 0
 __end_ofi2_USER_USB_CALLBACK_EVENT_HANDLER 39D6 0 CODE 0
@@ -780,11 +780,11 @@ idloc 200000 200007 IDLOC 200000 0
 bssCOMRAM 1 54 COMRAM 1 1
 bssBANK0 60 FF BANK0 60 1
 cstackBANK1 100 105 BANK1 100 1
-text25 8AA 4154 CODE 8AA 0
+text25 8AA 4156 CODE 8AA 0
 %locals
 dist/default/production\usbcdcdemo.X.production.o
 C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h
-C:\Users\bouci\AppData\Local\Temp\sdfo.s
+C:\Users\bouci\AppData\Local\Temp\s2v0.s
 2624 3EAC 0 CODE 0
 2626 3EAC 0 CODE 0
 2629 3EAC 0 CODE 0
@@ -893,7 +893,7 @@ usb_device_cdc.c
 main.c
 58 4146 0 CODE 0
 59 4146 0 CODE 0
-69 414C 0 CODE 0
+69 414E 0 CODE 0
 usb_cdc_lib.c
 31 3FB6 0 CODE 0
 33 3FB6 0 CODE 0
@@ -1539,8 +1539,8 @@ usb_device.c
 1828 287C 0 CODE 0
 1825 287E 0 CODE 0
 1831 288E 0 CODE 0
-C:\Users\bouci\AppData\Local\Temp\sdfo.s
-11983 8 0 CODE 0
+C:\Users\bouci\AppData\Local\Temp\s2v0.s
+11985 8 0 CODE 0
 main.c
 78 8 0 CODE 0
 main.c

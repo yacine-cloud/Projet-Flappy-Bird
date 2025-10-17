@@ -6864,7 +6864,7 @@ void sendFlap(void) {
 unsigned char result;
 
 unsigned char readButtonAsm(void) {
-    __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n");
+    __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n" "return\n");
 # 69 "main.c"
 }
 

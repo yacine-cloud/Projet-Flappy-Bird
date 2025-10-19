@@ -1,8 +1,8 @@
+
 #include <xc.h>
 #include "sysconfig.h"
 #include "usb_cdc_lib.h"
 #include "main.h"
-
 
 #pragma config FOSC = HSPLL_HS
 #pragma config PLLDIV = 2
@@ -11,70 +11,168 @@
 #pragma config WDT = OFF, LVP = OFF, MCLRE = ON
 // retire cette ligne : #pragma config PBADEN = OFF
 
-// Définition des ports
-#define LED LATCbits.LATC0
+// Définition des LEDs
+#define LED_FLAP      LATCbits.LATC0
+#define LED_PAUSE     LATCbits.LATC1
+#define LED_REPRENDRE LATCbits.LATC2
+#define LED_QUITTER_SET()   (LATC |= 0x08)   // RC3 à 1
+#define LED_QUITTER_CLEAR() (LATC &= ~0x08)  // RC3 à 0
 
 // Prototypes
 void debounceDelay(void);
 void sendFlap(void);
-unsigned char readButtonAsm(void); // Lecture bouton en ASM inline
+void sendPause(void);
+void sendReprendre(void);
+void sendQuitter(void);
+unsigned char readButton0Asm(void);
+unsigned char readButton1Asm(void);
+unsigned char readButton2Asm(void);
+unsigned char readButton3Asm(void);
+
+volatile unsigned char result;
 
 void main(void) {
     // Initialisation des ports
     TRISC = 0x00;           // Port C en sortie
     LATC = 0x00;            // LEDs éteintes
-    TRISDbits.TRISD0 = 1;   // Bouton en entrée
+    TRISDbits.TRISD0 = 1;   // Bouton FLAP
+    TRISDbits.TRISD1 = 1;   // Bouton PAUSE
+    TRISDbits.TRISD2 = 1;   // Bouton REPRENDRE
+    TRISDbits.TRISD3 = 1;   // Bouton QUITTER
 
     // Initialisation USB
     initUSBLib();
 
+    unsigned char last_btn0_state = 1;
+    unsigned char last_btn1_state = 1;
+    unsigned char last_btn2_state = 1;
+    unsigned char last_btn3_state = 1;
+
     while(1) {
-        // Gérer les tâches USB
         USBDeviceTasks();
 
-        // Si USB est prêt
         if (isUSBReady()) {
-            unsigned char btn_state = readButtonAsm();  // Lecture du bouton
-            if (btn_state) {
-                LED = 1;        // Allume LED
-                sendFlap();     // Envoie "flap"
-                debounceDelay();
-                while(readButtonAsm()); // Attente relâchement
-                LED = 0;        // Éteint LED
+            unsigned char btn0_state = readButton0Asm();
+            unsigned char btn1_state = readButton1Asm();
+            unsigned char btn2_state = readButton2Asm();
+            unsigned char btn3_state = readButton3Asm();
+
+            // --- Bouton FLAP (RD0) ---
+            if (btn0_state == 0 && last_btn0_state == 1) {
+                LED_FLAP = 1;
+                sendFlap();
             }
+            if (btn0_state == 1 && last_btn0_state == 0) {
+                LED_FLAP = 0;
+                sendFlap();
+            }
+            last_btn0_state = btn0_state;
+
+            // --- Bouton PAUSE (RD1) ---
+            if (btn1_state == 0 && last_btn1_state == 1) {
+                LED_PAUSE = 1;
+                sendPause();
+            }
+            if (btn1_state == 1 && last_btn1_state == 0) {
+                LED_PAUSE = 0;
+                sendPause();
+            }
+            last_btn1_state = btn1_state;
+
+            // --- Bouton REPRENDRE (RD2) ---
+            if (btn2_state == 0 && last_btn2_state == 1) {
+                LED_REPRENDRE = 1;
+                sendReprendre();
+            }
+            if (btn2_state == 1 && last_btn2_state == 0) {
+                LED_REPRENDRE = 0;
+                sendReprendre();
+            }
+            last_btn2_state = btn2_state;
+
+            // --- Bouton QUITTER (RD3) ---
+            if (btn3_state == 0 && last_btn3_state == 1) {
+                LED_QUITTER_SET();
+                sendQuitter();
+            }
+            if (btn3_state == 1 && last_btn3_state == 0) {
+                LED_QUITTER_CLEAR();
+                sendQuitter();
+            }
+            last_btn3_state = btn3_state;
         }
     }
 }
 
-// Fonction qui envoie "flap\r\n" via USB
+// --- Envoi des messages ---
 void sendFlap(void) {
     char msg[] = "FLAP\r\n";
     putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
-    CDCTxService(); // S'assurer que les données sont transmises
+    CDCTxService();
 }
 
-unsigned char result;
+void sendPause(void) {
+    char msg[] = "PAUSE\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
 
-unsigned char readButtonAsm(void) {
+void sendReprendre(void) {
+    char msg[] = "REPRENDRE\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
+
+void sendQuitter(void) {
+    char msg[] = "QUITTER\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
+
+// --- Lecture des boutons en ASM ---
+unsigned char readButton0Asm(void) {
+    result = 1;
     asm(
-        "movlw 0x01\n"      // result = 0 par défaut
-        "btfss PORTD, 0\n"     // skip next if RD0 = 1         // bouton pressé ? 1
-        "movlw 0x00\n" 
-        "return\n"
-       
-       
-        // Bouton non pressé ? result = 0
+        "btfss PORTD, 0\n"
+        "clrf _result\n"
     );
-    
+    return result;
 }
 
-// Simple délai anti-rebond
+unsigned char readButton1Asm(void) {
+    result = 1;
+    asm(
+        "btfss PORTD, 1\n"
+        "clrf _result\n"
+    );
+    return result;
+}
+
+unsigned char readButton2Asm(void) {
+    result = 1;
+    asm(
+        "btfss PORTD, 2\n"
+        "clrf _result\n"
+    );
+    return result;
+}
+
+unsigned char readButton3Asm(void) {
+    result = 1;
+    asm(
+        "btfss PORTD, 3\n"
+        "clrf _result\n"
+    );
+    return result;
+}
+
+// Délai anti-rebond
 void debounceDelay(void) {
     for (volatile int i=0; i<255; i++)
         for (volatile int j=0; j<255; j++);
 }
 
-// Interruption USB (optionnelle, selon stack)
+// Interruption USB
 void __interrupt() mainISR(void) {
     processUSBTasks();
 }

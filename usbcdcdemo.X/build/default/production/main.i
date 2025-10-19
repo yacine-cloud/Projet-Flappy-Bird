@@ -7,6 +7,7 @@
 # 1 "C:\\Program Files (x86)\\Microchip\\xc8\\v2.10\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
 # 1 "main.c" 2
+
 # 1 "C:\\Program Files (x86)\\Microchip\\xc8\\v2.10\\pic\\include\\xc.h" 1 3
 # 18 "C:\\Program Files (x86)\\Microchip\\xc8\\v2.10\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -5618,7 +5619,7 @@ extern __attribute__((nonreentrant)) void _delaywdt(unsigned long);
 #pragma intrinsic(_delay3)
 extern __attribute__((nonreentrant)) void _delay3(unsigned char);
 # 32 "C:\\Program Files (x86)\\Microchip\\xc8\\v2.10\\pic\\include\\xc.h" 2 3
-# 1 "main.c" 2
+# 2 "main.c" 2
 
 # 1 "./sysconfig.h" 1
 
@@ -5685,7 +5686,7 @@ extern __attribute__((nonreentrant)) void _delay3(unsigned char);
 
 
 #pragma config EBTRB = OFF
-# 2 "main.c" 2
+# 3 "main.c" 2
 
 # 1 "./usb_cdc_lib.h" 1
 
@@ -6800,7 +6801,7 @@ void initUSBLib(void);
 unsigned char isUSBReady(void);
 
 __attribute__((inline)) void processUSBTasks(void);
-# 3 "main.c" 2
+# 4 "main.c" 2
 
 # 1 "./main.h" 1
 
@@ -6808,8 +6809,7 @@ __attribute__((inline)) void processUSBTasks(void);
 
 static unsigned char usbReadBuffer[32];
 static unsigned char usbWriteBuffer[32];
-# 4 "main.c" 2
-
+# 5 "main.c" 2
 
 
 #pragma config FOSC = HSPLL_HS
@@ -6817,39 +6817,88 @@ static unsigned char usbWriteBuffer[32];
 #pragma config CPUDIV = OSC1_PLL2
 #pragma config USBDIV = 2
 #pragma config WDT = OFF, LVP = OFF, MCLRE = ON
-
-
-
-
-
-
+# 22 "main.c"
 void debounceDelay(void);
 void sendFlap(void);
-unsigned char readButtonAsm(void);
+void sendPause(void);
+void sendReprendre(void);
+void sendQuitter(void);
+unsigned char readButton0Asm(void);
+unsigned char readButton1Asm(void);
+unsigned char readButton2Asm(void);
+unsigned char readButton3Asm(void);
+
+volatile unsigned char result;
 
 void main(void) {
 
     TRISC = 0x00;
     LATC = 0x00;
     TRISDbits.TRISD0 = 1;
+    TRISDbits.TRISD1 = 1;
+    TRISDbits.TRISD2 = 1;
+    TRISDbits.TRISD3 = 1;
 
 
     initUSBLib();
 
-    while(1) {
+    unsigned char last_btn0_state = 1;
+    unsigned char last_btn1_state = 1;
+    unsigned char last_btn2_state = 1;
+    unsigned char last_btn3_state = 1;
 
+    while(1) {
         USBDeviceTasks();
 
-
         if (isUSBReady()) {
-            unsigned char btn_state = readButtonAsm();
-            if (btn_state) {
+            unsigned char btn0_state = readButton0Asm();
+            unsigned char btn1_state = readButton1Asm();
+            unsigned char btn2_state = readButton2Asm();
+            unsigned char btn3_state = readButton3Asm();
+
+
+            if (btn0_state == 0 && last_btn0_state == 1) {
                 LATCbits.LATC0 = 1;
                 sendFlap();
-                debounceDelay();
-                while(readButtonAsm());
-                LATCbits.LATC0 = 0;
             }
+            if (btn0_state == 1 && last_btn0_state == 0) {
+                LATCbits.LATC0 = 0;
+                sendFlap();
+            }
+            last_btn0_state = btn0_state;
+
+
+            if (btn1_state == 0 && last_btn1_state == 1) {
+                LATCbits.LATC1 = 1;
+                sendPause();
+            }
+            if (btn1_state == 1 && last_btn1_state == 0) {
+                LATCbits.LATC1 = 0;
+                sendPause();
+            }
+            last_btn1_state = btn1_state;
+
+
+            if (btn2_state == 0 && last_btn2_state == 1) {
+                LATCbits.LATC2 = 1;
+                sendReprendre();
+            }
+            if (btn2_state == 1 && last_btn2_state == 0) {
+                LATCbits.LATC2 = 0;
+                sendReprendre();
+            }
+            last_btn2_state = btn2_state;
+
+
+            if (btn3_state == 0 && last_btn3_state == 1) {
+                (LATC |= 0x08);
+                sendQuitter();
+            }
+            if (btn3_state == 1 && last_btn3_state == 0) {
+                (LATC &= ~0x08);
+                sendQuitter();
+            }
+            last_btn3_state = btn3_state;
         }
     }
 }
@@ -6861,11 +6910,59 @@ void sendFlap(void) {
     CDCTxService();
 }
 
-unsigned char result;
+void sendPause(void) {
+    char msg[] = "PAUSE\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
 
-unsigned char readButtonAsm(void) {
-    __asm("movlw 0x01\n" "btfss PORTD, 0\n" "movlw 0x00\n" "return\n");
-# 69 "main.c"
+void sendReprendre(void) {
+    char msg[] = "REPRENDRE\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
+
+void sendQuitter(void) {
+    char msg[] = "QUITTER\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
+
+
+unsigned char readButton0Asm(void) {
+    result = 1;
+    __asm("btfss PORTD, 0\n" "clrf _result\n");
+
+
+
+    return result;
+}
+
+unsigned char readButton1Asm(void) {
+    result = 1;
+    __asm("btfss PORTD, 1\n" "clrf _result\n");
+
+
+
+    return result;
+}
+
+unsigned char readButton2Asm(void) {
+    result = 1;
+    __asm("btfss PORTD, 2\n" "clrf _result\n");
+
+
+
+    return result;
+}
+
+unsigned char readButton3Asm(void) {
+    result = 1;
+    __asm("btfss PORTD, 3\n" "clrf _result\n");
+
+
+
+    return result;
 }
 
 

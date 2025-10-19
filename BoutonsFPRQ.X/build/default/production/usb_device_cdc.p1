@@ -1,0 +1,1520 @@
+Version 4.0 HI-TECH Software Intermediate Code
+"848 ./usb_device_cdc.h
+[; ;./usb_device_cdc.h: 848:     {
+[s S422 `uc -> 7 `i ]
+[n S422 . _byte ]
+"852
+[; ;./usb_device_cdc.h: 852:     {
+[s S423 `ul 1 `uc 1 `uc 1 `uc 1 ]
+[n S423 . dwDTERate bCharFormat bParityType bDataBits ]
+"846
+[; ;./usb_device_cdc.h: 846: {
+[u S421 `S422 1 `S423 1 ]
+[n S421 _LINE_CODING . . ]
+"912
+[; ;./usb_device_cdc.h: 912: {
+[u S430 `S421 1 `S421 1 `uc -> 10 `i ]
+[n S430 _CDC_NOTICE GetLineCoding SetLineCoding packet ]
+"346 ./usb_hal_pic18.h
+[; ;./usb_hal_pic18.h: 346:     {
+[s S420 `uc 1 `uc 1 ]
+[n S420 . bLow bHigh ]
+"344
+[; ;./usb_hal_pic18.h: 344: {
+[u S419 `S420 1 `us 1 `*uc 1 `*us 1 `*Cuc 1 `*Cus 1 ]
+[n S419 _POINTER . _word bRam wRam bRom wRom ]
+"864 ./usb_device_cdc.h
+[; ;./usb_device_cdc.h: 864:     {
+[s S425 :1 `uc 1 :1 `uc 1 ]
+[n S425 . DTE_PRESENT CARRIER_CONTROL ]
+"861
+[; ;./usb_device_cdc.h: 861: {
+[u S424 `uc 1 `S425 1 ]
+[n S424 _CONTROL_SIGNAL_BITMAP _byte . ]
+"272 ./usb_ch9.h
+[; ;./usb_ch9.h: 272:     {
+[s S15 `uc 1 `uc 1 `us 1 `us 1 `us 1 ]
+[n S15 . bmRequestType bRequest wValue wIndex wLength ]
+"288
+[; ;./usb_ch9.h: 288:             {
+[s S18 `uc 1 `uc 1 ]
+[n S18 . LB HB ]
+"284
+[; ;./usb_ch9.h: 284:         {
+[u S17 `us 1 `uc -> 2 `i `S18 1 ]
+[n S17 . Val v byte ]
+"299
+[; ;./usb_ch9.h: 299:             {
+[s S20 `uc 1 `uc 1 ]
+[n S20 . LB HB ]
+"295
+[; ;./usb_ch9.h: 295:         {
+[u S19 `us 1 `uc -> 2 `i `S20 1 ]
+[n S19 . Val v byte ]
+"310
+[; ;./usb_ch9.h: 310:             {
+[s S22 `uc 1 `uc 1 ]
+[n S22 . LB HB ]
+"306
+[; ;./usb_ch9.h: 306:         {
+[u S21 `us 1 `uc -> 2 `i `S22 1 ]
+[n S21 . Val v byte ]
+"280
+[; ;./usb_ch9.h: 280:     {
+[s S16 :8 `uc 1 :8 `uc 1 `S17 1 `S19 1 `S21 1 ]
+[n S16 . . . W_Value W_Index W_Length ]
+"317
+[; ;./usb_ch9.h: 317:     {
+[s S23 :5 `uc 1 :2 `uc 1 :1 `uc 1 :8 `uc 1 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S23 . Recipient RequestType DataDir . bFeature . . . . . ]
+"335
+[; ;./usb_ch9.h: 335:             {
+[s S26 :5 `uc 1 :2 `uc 1 :1 `uc 1 ]
+[n S26 . recipient type direction ]
+"332
+[; ;./usb_ch9.h: 332:         {
+[u S25 `uc 1 `S26 1 ]
+[n S25 . bmRequestType . ]
+"330
+[; ;./usb_ch9.h: 330:     {
+[s S24 `S25 1 ]
+[n S24 . requestInfo ]
+"343
+[; ;./usb_ch9.h: 343:     {
+[s S27 :8 `uc 1 :8 `uc 1 `uc 1 `uc 1 `us 1 :8 `uc 1 :8 `uc 1 ]
+[n S27 . . . bDscIndex bDescriptorType wLangID . . ]
+"353
+[; ;./usb_ch9.h: 353:     {
+[s S28 :8 `uc 1 :8 `uc 1 `uc 1 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S28 . . . bDevADR bDevADRH . . . . ]
+"364
+[; ;./usb_ch9.h: 364:     {
+[s S29 :8 `uc 1 :8 `uc 1 `uc 1 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S29 . . . bConfigurationValue bCfgRSD . . . . ]
+"375
+[; ;./usb_ch9.h: 375:     {
+[s S30 :8 `uc 1 :8 `uc 1 `uc 1 `uc 1 `uc 1 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S30 . . . bAltID bAltID_H bIntfID bIntfID_H . . ]
+"386
+[; ;./usb_ch9.h: 386:     {
+[s S31 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 `uc 1 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S31 . . . . . bEPID bEPID_H . . ]
+"397
+[; ;./usb_ch9.h: 397:     {
+[s S32 :8 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 :4 `uc 1 :3 `uc 1 :1 `uc 1 :8 `uc 1 :8 `uc 1 :8 `uc 1 ]
+[n S32 . . . . . EPNum . EPDir . . . ]
+"269
+[; ;./usb_ch9.h: 269: {
+[u S14 `S15 1 `S16 1 `S23 1 `S24 1 `S27 1 `S28 1 `S29 1 `S30 1 `S31 1 `S32 1 ]
+[n S14 . . . . . . . . . . . ]
+"960 ./usb_device_cdc.h
+[; ;./usb_device_cdc.h: 960: extern volatile CTRL_TRF_SETUP SetupPkt;
+[v _SetupPkt `VS14 ~T0 @X0 0 e ]
+"1997 ./usb_device.h
+[; ;./usb_device.h: 1997:     {
+[u S36 `*uc 1 `*Cuc 1 `*us 1 `*Cus 1 ]
+[n S36 . bRam bRom wRam wRom ]
+"2008
+[; ;./usb_device.h: 2008:         {
+[s S38 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S38 . ctrl_trf_mem reserved includeZero busy ]
+"2006
+[; ;./usb_device.h: 2006:     {
+[u S37 `S38 1 `uc 1 ]
+[n S37 . bits Val ]
+"1985
+[; ;./usb_device.h: 1985:     {
+[s S34 `uc 1 `uc 1 ]
+[n S34 . LB HB ]
+"1981
+[; ;./usb_device.h: 1981: {
+[u S33 `us 1 `uc -> 2 `i `S34 1 ]
+[n S33 . Val v byte ]
+"1995
+[; ;./usb_device.h: 1995: {
+[s S35 `S36 1 `S37 1 `S33 1 ]
+[n S35 . pSrc info wCount ]
+"614 ./usb_hal_pic18.h
+[; ;./usb_hal_pic18.h: 614:     extern volatile IN_PIPE inPipes[1];
+[v _inPipes `VS35 ~T0 @X0 -> 0 `x e ]
+"2028 ./usb_device.h
+[; ;./usb_device.h: 2028:     {
+[u S40 `*uc 1 `*us 1 ]
+[n S40 . bRam wRam ]
+"2037
+[; ;./usb_device.h: 2037:         {
+[s S42 :7 `uc 1 :1 `uc 1 ]
+[n S42 . reserved busy ]
+"2035
+[; ;./usb_device.h: 2035:     {
+[u S41 `S42 1 `uc 1 ]
+[n S41 . bits Val ]
+[v F424 `(v ~T0 @X0 0 tf ]
+"2026
+[; ;./usb_device.h: 2026: {
+[s S39 `S40 1 `S41 1 `S33 1 `*F424 1 ]
+[n S39 . pDst info wCount pFunc ]
+"615 ./usb_hal_pic18.h
+[; ;./usb_hal_pic18.h: 615:     extern volatile OUT_PIPE outPipes[1];
+[v _outPipes `VS39 ~T0 @X0 -> 0 `x e ]
+[v F3975 `(v ~T0 @X0 0 tf ]
+"355 ./usb_device.h
+[; ;./usb_device.h: 355: void USBEnableEndpoint(uint8_t ep, uint8_t options);
+[v _USBEnableEndpoint `(v ~T0 @X0 0 ef2`uc`uc ]
+"448
+[; ;./usb_device.h: 448: void* USBTransferOnePacket(uint8_t ep,uint8_t dir,uint8_t* data,uint8_t len);
+[v _USBTransferOnePacket `(*v ~T0 @X0 0 ef4`uc`uc`*uc`uc ]
+"424 usb_device_cdc.c
+[; ;usb_device_cdc.c: 424: _Bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
+[c E44 0 1 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 400 500 600 700 800 900 1000 10000 32767 .. ]
+[n E44 . EVENT_NONE EVENT_DEVICE_STACK_BASE EVENT_HOST_STACK_BASE EVENT_HUB_ATTACH EVENT_STALL EVENT_VBUS_SES_REQUEST EVENT_VBUS_OVERCURRENT EVENT_VBUS_REQUEST_POWER EVENT_VBUS_RELEASE_POWER EVENT_VBUS_POWER_AVAILABLE EVENT_UNSUPPORTED_DEVICE EVENT_CANNOT_ENUMERATE EVENT_CLIENT_INIT_ERROR EVENT_OUT_OF_MEMORY EVENT_UNSPECIFIED_ERROR EVENT_DETACH EVENT_TRANSFER EVENT_SOF EVENT_RESUME EVENT_SUSPEND EVENT_RESET EVENT_DATA_ISOC_READ EVENT_DATA_ISOC_WRITE EVENT_OVERRIDE_CLIENT_DRIVER_SELECTION EVENT_1MS EVENT_ALT_INTERFACE EVENT_HOLD_BEFORE_CONFIGURATION EVENT_GENERIC_BASE EVENT_MSD_BASE EVENT_HID_BASE EVENT_PRINTER_BASE EVENT_CDC_BASE EVENT_CHARGER_BASE EVENT_AUDIO_BASE EVENT_USER_BASE EVENT_BUS_ERROR  ]
+"442
+[; ;usb_device_cdc.c: 442:     }
+[c E304 1 2 3 4 5 .. ]
+[n E304 . EVENT_CONFIGURED EVENT_SET_DESCRIPTOR EVENT_EP0_REQUEST EVENT_ATTACH EVENT_TRANSFER_TERMINATED  ]
+"276 ./usb_hal_pic18.h
+[; ;./usb_hal_pic18.h: 276:     struct{
+[s S411 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S411 . BC8 BC9 BSTALL DTSEN INCDIS KEN DTS UOWN ]
+"287
+[; ;./usb_hal_pic18.h: 287:     struct{
+[s S412 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S412 . . PID0 PID1 PID2 PID3 . ]
+"297
+[; ;./usb_hal_pic18.h: 297:     struct{
+[s S413 :2 `uc 1 :4 `uc 1 :2 `uc 1 ]
+[n S413 . . PID . ]
+"274
+[; ;./usb_hal_pic18.h: 274: {
+[u S410 `uc 1 `S411 1 `S412 1 `S413 1 ]
+[n S410 _BD_STAT Val . . . ]
+"308
+[; ;./usb_hal_pic18.h: 308:     {
+[s S415 `S410 1 `uc 1 `uc 1 `uc 1 ]
+[n S415 . STAT CNT ADRL ADRH ]
+"315
+[; ;./usb_hal_pic18.h: 315:     {
+[s S416 :8 `uc 1 :8 `uc 1 `us 1 ]
+[n S416 . . . ADR ]
+"306
+[; ;./usb_hal_pic18.h: 306: {
+[u S414 `S415 1 `S416 1 `ul 1 `uc -> 4 `i ]
+[n S414 __BDT . . Val v ]
+"4642 C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4642:     struct {
+[s S226 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S226 . CCP2IE TMR3IE HLVDIE BCLIE EEIE USBIE CMIE OSCFIE ]
+"4652
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4652:     struct {
+[s S227 :2 `uc 1 :1 `uc 1 ]
+[n S227 . . LVDIE ]
+"4641
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4641: typedef union {
+[u S225 `S226 1 `S227 1 ]
+[n S225 . . . ]
+"4657
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4657: extern volatile PIE2bits_t PIE2bits __attribute__((address(0xFA0)));
+[v _PIE2bits `VS225 ~T0 @X0 0 e@4000 ]
+"54 C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 54: __asm("SPPDATA equ 0F62h");
+[; <" SPPDATA equ 0F62h ;# ">
+"74
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 74: __asm("SPPCFG equ 0F63h");
+[; <" SPPCFG equ 0F63h ;# ">
+"151
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 151: __asm("SPPEPS equ 0F64h");
+[; <" SPPEPS equ 0F64h ;# ">
+"225
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 225: __asm("SPPCON equ 0F65h");
+[; <" SPPCON equ 0F65h ;# ">
+"251
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 251: __asm("UFRM equ 0F66h");
+[; <" UFRM equ 0F66h ;# ">
+"258
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 258: __asm("UFRML equ 0F66h");
+[; <" UFRML equ 0F66h ;# ">
+"336
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 336: __asm("UFRMH equ 0F67h");
+[; <" UFRMH equ 0F67h ;# ">
+"376
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 376: __asm("UIR equ 0F68h");
+[; <" UIR equ 0F68h ;# ">
+"432
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 432: __asm("UIE equ 0F69h");
+[; <" UIE equ 0F69h ;# ">
+"488
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 488: __asm("UEIR equ 0F6Ah");
+[; <" UEIR equ 0F6Ah ;# ">
+"539
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 539: __asm("UEIE equ 0F6Bh");
+[; <" UEIE equ 0F6Bh ;# ">
+"590
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 590: __asm("USTAT equ 0F6Ch");
+[; <" USTAT equ 0F6Ch ;# ">
+"650
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 650: __asm("UCON equ 0F6Dh");
+[; <" UCON equ 0F6Dh ;# ">
+"701
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 701: __asm("UADDR equ 0F6Eh");
+[; <" UADDR equ 0F6Eh ;# ">
+"765
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 765: __asm("UCFG equ 0F6Fh");
+[; <" UCFG equ 0F6Fh ;# ">
+"844
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 844: __asm("UEP0 equ 0F70h");
+[; <" UEP0 equ 0F70h ;# ">
+"952
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 952: __asm("UEP1 equ 0F71h");
+[; <" UEP1 equ 0F71h ;# ">
+"1060
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1060: __asm("UEP2 equ 0F72h");
+[; <" UEP2 equ 0F72h ;# ">
+"1168
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1168: __asm("UEP3 equ 0F73h");
+[; <" UEP3 equ 0F73h ;# ">
+"1276
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1276: __asm("UEP4 equ 0F74h");
+[; <" UEP4 equ 0F74h ;# ">
+"1384
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1384: __asm("UEP5 equ 0F75h");
+[; <" UEP5 equ 0F75h ;# ">
+"1492
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1492: __asm("UEP6 equ 0F76h");
+[; <" UEP6 equ 0F76h ;# ">
+"1600
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1600: __asm("UEP7 equ 0F77h");
+[; <" UEP7 equ 0F77h ;# ">
+"1708
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1708: __asm("UEP8 equ 0F78h");
+[; <" UEP8 equ 0F78h ;# ">
+"1784
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1784: __asm("UEP9 equ 0F79h");
+[; <" UEP9 equ 0F79h ;# ">
+"1860
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1860: __asm("UEP10 equ 0F7Ah");
+[; <" UEP10 equ 0F7Ah ;# ">
+"1936
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 1936: __asm("UEP11 equ 0F7Bh");
+[; <" UEP11 equ 0F7Bh ;# ">
+"2012
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2012: __asm("UEP12 equ 0F7Ch");
+[; <" UEP12 equ 0F7Ch ;# ">
+"2088
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2088: __asm("UEP13 equ 0F7Dh");
+[; <" UEP13 equ 0F7Dh ;# ">
+"2164
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2164: __asm("UEP14 equ 0F7Eh");
+[; <" UEP14 equ 0F7Eh ;# ">
+"2240
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2240: __asm("UEP15 equ 0F7Fh");
+[; <" UEP15 equ 0F7Fh ;# ">
+"2316
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2316: __asm("PORTA equ 0F80h");
+[; <" PORTA equ 0F80h ;# ">
+"2455
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2455: __asm("PORTB equ 0F81h");
+[; <" PORTB equ 0F81h ;# ">
+"2565
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2565: __asm("PORTC equ 0F82h");
+[; <" PORTC equ 0F82h ;# ">
+"2707
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2707: __asm("PORTD equ 0F83h");
+[; <" PORTD equ 0F83h ;# ">
+"2828
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2828: __asm("PORTE equ 0F84h");
+[; <" PORTE equ 0F84h ;# ">
+"2975
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 2975: __asm("LATA equ 0F89h");
+[; <" LATA equ 0F89h ;# ">
+"3075
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3075: __asm("LATB equ 0F8Ah");
+[; <" LATB equ 0F8Ah ;# ">
+"3187
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3187: __asm("LATC equ 0F8Bh");
+[; <" LATC equ 0F8Bh ;# ">
+"3265
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3265: __asm("LATD equ 0F8Ch");
+[; <" LATD equ 0F8Ch ;# ">
+"3377
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3377: __asm("LATE equ 0F8Dh");
+[; <" LATE equ 0F8Dh ;# ">
+"3429
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3429: __asm("TRISA equ 0F92h");
+[; <" TRISA equ 0F92h ;# ">
+"3434
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3434: __asm("DDRA equ 0F92h");
+[; <" DDRA equ 0F92h ;# ">
+"3627
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3627: __asm("TRISB equ 0F93h");
+[; <" TRISB equ 0F93h ;# ">
+"3632
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3632: __asm("DDRB equ 0F93h");
+[; <" DDRB equ 0F93h ;# ">
+"3849
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3849: __asm("TRISC equ 0F94h");
+[; <" TRISC equ 0F94h ;# ">
+"3854
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 3854: __asm("DDRC equ 0F94h");
+[; <" DDRC equ 0F94h ;# ">
+"4003
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4003: __asm("TRISD equ 0F95h");
+[; <" TRISD equ 0F95h ;# ">
+"4008
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4008: __asm("DDRD equ 0F95h");
+[; <" DDRD equ 0F95h ;# ">
+"4225
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4225: __asm("TRISE equ 0F96h");
+[; <" TRISE equ 0F96h ;# ">
+"4230
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4230: __asm("DDRE equ 0F96h");
+[; <" DDRE equ 0F96h ;# ">
+"4327
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4327: __asm("OSCTUNE equ 0F9Bh");
+[; <" OSCTUNE equ 0F9Bh ;# ">
+"4386
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4386: __asm("PIE1 equ 0F9Dh");
+[; <" PIE1 equ 0F9Dh ;# ">
+"4470
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4470: __asm("PIR1 equ 0F9Eh");
+[; <" PIR1 equ 0F9Eh ;# ">
+"4554
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4554: __asm("IPR1 equ 0F9Fh");
+[; <" IPR1 equ 0F9Fh ;# ">
+"4638
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4638: __asm("PIE2 equ 0FA0h");
+[; <" PIE2 equ 0FA0h ;# ">
+"4709
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4709: __asm("PIR2 equ 0FA1h");
+[; <" PIR2 equ 0FA1h ;# ">
+"4780
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4780: __asm("IPR2 equ 0FA2h");
+[; <" IPR2 equ 0FA2h ;# ">
+"4851
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4851: __asm("EECON1 equ 0FA6h");
+[; <" EECON1 equ 0FA6h ;# ">
+"4917
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4917: __asm("EECON2 equ 0FA7h");
+[; <" EECON2 equ 0FA7h ;# ">
+"4924
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4924: __asm("EEDATA equ 0FA8h");
+[; <" EEDATA equ 0FA8h ;# ">
+"4931
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4931: __asm("EEADR equ 0FA9h");
+[; <" EEADR equ 0FA9h ;# ">
+"4938
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4938: __asm("RCSTA equ 0FABh");
+[; <" RCSTA equ 0FABh ;# ">
+"4943
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 4943: __asm("RCSTA1 equ 0FABh");
+[; <" RCSTA1 equ 0FABh ;# ">
+"5148
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5148: __asm("TXSTA equ 0FACh");
+[; <" TXSTA equ 0FACh ;# ">
+"5153
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5153: __asm("TXSTA1 equ 0FACh");
+[; <" TXSTA1 equ 0FACh ;# ">
+"5404
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5404: __asm("TXREG equ 0FADh");
+[; <" TXREG equ 0FADh ;# ">
+"5409
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5409: __asm("TXREG1 equ 0FADh");
+[; <" TXREG1 equ 0FADh ;# ">
+"5416
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5416: __asm("RCREG equ 0FAEh");
+[; <" RCREG equ 0FAEh ;# ">
+"5421
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5421: __asm("RCREG1 equ 0FAEh");
+[; <" RCREG1 equ 0FAEh ;# ">
+"5428
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5428: __asm("SPBRG equ 0FAFh");
+[; <" SPBRG equ 0FAFh ;# ">
+"5433
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5433: __asm("SPBRG1 equ 0FAFh");
+[; <" SPBRG1 equ 0FAFh ;# ">
+"5440
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5440: __asm("SPBRGH equ 0FB0h");
+[; <" SPBRGH equ 0FB0h ;# ">
+"5447
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5447: __asm("T3CON equ 0FB1h");
+[; <" T3CON equ 0FB1h ;# ">
+"5568
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5568: __asm("TMR3 equ 0FB2h");
+[; <" TMR3 equ 0FB2h ;# ">
+"5575
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5575: __asm("TMR3L equ 0FB2h");
+[; <" TMR3L equ 0FB2h ;# ">
+"5582
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5582: __asm("TMR3H equ 0FB3h");
+[; <" TMR3H equ 0FB3h ;# ">
+"5589
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5589: __asm("CMCON equ 0FB4h");
+[; <" CMCON equ 0FB4h ;# ">
+"5679
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5679: __asm("CVRCON equ 0FB5h");
+[; <" CVRCON equ 0FB5h ;# ">
+"5764
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5764: __asm("ECCP1AS equ 0FB6h");
+[; <" ECCP1AS equ 0FB6h ;# ">
+"5769
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5769: __asm("CCP1AS equ 0FB6h");
+[; <" CCP1AS equ 0FB6h ;# ">
+"5926
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5926: __asm("ECCP1DEL equ 0FB7h");
+[; <" ECCP1DEL equ 0FB7h ;# ">
+"5931
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 5931: __asm("CCP1DEL equ 0FB7h");
+[; <" CCP1DEL equ 0FB7h ;# ">
+"6064
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6064: __asm("BAUDCON equ 0FB8h");
+[; <" BAUDCON equ 0FB8h ;# ">
+"6069
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6069: __asm("BAUDCTL equ 0FB8h");
+[; <" BAUDCTL equ 0FB8h ;# ">
+"6244
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6244: __asm("CCP2CON equ 0FBAh");
+[; <" CCP2CON equ 0FBAh ;# ">
+"6308
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6308: __asm("CCPR2 equ 0FBBh");
+[; <" CCPR2 equ 0FBBh ;# ">
+"6315
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6315: __asm("CCPR2L equ 0FBBh");
+[; <" CCPR2L equ 0FBBh ;# ">
+"6322
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6322: __asm("CCPR2H equ 0FBCh");
+[; <" CCPR2H equ 0FBCh ;# ">
+"6329
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6329: __asm("CCP1CON equ 0FBDh");
+[; <" CCP1CON equ 0FBDh ;# ">
+"6334
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6334: __asm("ECCP1CON equ 0FBDh");
+[; <" ECCP1CON equ 0FBDh ;# ">
+"6491
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6491: __asm("CCPR1 equ 0FBEh");
+[; <" CCPR1 equ 0FBEh ;# ">
+"6498
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6498: __asm("CCPR1L equ 0FBEh");
+[; <" CCPR1L equ 0FBEh ;# ">
+"6505
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6505: __asm("CCPR1H equ 0FBFh");
+[; <" CCPR1H equ 0FBFh ;# ">
+"6512
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6512: __asm("ADCON2 equ 0FC0h");
+[; <" ADCON2 equ 0FC0h ;# ">
+"6583
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6583: __asm("ADCON1 equ 0FC1h");
+[; <" ADCON1 equ 0FC1h ;# ">
+"6668
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6668: __asm("ADCON0 equ 0FC2h");
+[; <" ADCON0 equ 0FC2h ;# ">
+"6787
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6787: __asm("ADRES equ 0FC3h");
+[; <" ADRES equ 0FC3h ;# ">
+"6794
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6794: __asm("ADRESL equ 0FC3h");
+[; <" ADRESL equ 0FC3h ;# ">
+"6801
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6801: __asm("ADRESH equ 0FC4h");
+[; <" ADRESH equ 0FC4h ;# ">
+"6808
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6808: __asm("SSPCON2 equ 0FC5h");
+[; <" SSPCON2 equ 0FC5h ;# ">
+"6870
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6870: __asm("SSPCON1 equ 0FC6h");
+[; <" SSPCON1 equ 0FC6h ;# ">
+"6940
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 6940: __asm("SSPSTAT equ 0FC7h");
+[; <" SSPSTAT equ 0FC7h ;# ">
+"7188
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7188: __asm("SSPADD equ 0FC8h");
+[; <" SSPADD equ 0FC8h ;# ">
+"7195
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7195: __asm("SSPBUF equ 0FC9h");
+[; <" SSPBUF equ 0FC9h ;# ">
+"7202
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7202: __asm("T2CON equ 0FCAh");
+[; <" T2CON equ 0FCAh ;# ">
+"7300
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7300: __asm("PR2 equ 0FCBh");
+[; <" PR2 equ 0FCBh ;# ">
+"7305
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7305: __asm("MEMCON equ 0FCBh");
+[; <" MEMCON equ 0FCBh ;# ">
+"7410
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7410: __asm("TMR2 equ 0FCCh");
+[; <" TMR2 equ 0FCCh ;# ">
+"7417
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7417: __asm("T1CON equ 0FCDh");
+[; <" T1CON equ 0FCDh ;# ">
+"7520
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7520: __asm("TMR1 equ 0FCEh");
+[; <" TMR1 equ 0FCEh ;# ">
+"7527
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7527: __asm("TMR1L equ 0FCEh");
+[; <" TMR1L equ 0FCEh ;# ">
+"7534
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7534: __asm("TMR1H equ 0FCFh");
+[; <" TMR1H equ 0FCFh ;# ">
+"7541
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7541: __asm("RCON equ 0FD0h");
+[; <" RCON equ 0FD0h ;# ">
+"7690
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7690: __asm("WDTCON equ 0FD1h");
+[; <" WDTCON equ 0FD1h ;# ">
+"7718
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7718: __asm("HLVDCON equ 0FD2h");
+[; <" HLVDCON equ 0FD2h ;# ">
+"7723
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7723: __asm("LVDCON equ 0FD2h");
+[; <" LVDCON equ 0FD2h ;# ">
+"7988
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 7988: __asm("OSCCON equ 0FD3h");
+[; <" OSCCON equ 0FD3h ;# ">
+"8071
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8071: __asm("T0CON equ 0FD5h");
+[; <" T0CON equ 0FD5h ;# ">
+"8141
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8141: __asm("TMR0 equ 0FD6h");
+[; <" TMR0 equ 0FD6h ;# ">
+"8148
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8148: __asm("TMR0L equ 0FD6h");
+[; <" TMR0L equ 0FD6h ;# ">
+"8155
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8155: __asm("TMR0H equ 0FD7h");
+[; <" TMR0H equ 0FD7h ;# ">
+"8162
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8162: __asm("STATUS equ 0FD8h");
+[; <" STATUS equ 0FD8h ;# ">
+"8233
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8233: __asm("FSR2 equ 0FD9h");
+[; <" FSR2 equ 0FD9h ;# ">
+"8240
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8240: __asm("FSR2L equ 0FD9h");
+[; <" FSR2L equ 0FD9h ;# ">
+"8247
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8247: __asm("FSR2H equ 0FDAh");
+[; <" FSR2H equ 0FDAh ;# ">
+"8254
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8254: __asm("PLUSW2 equ 0FDBh");
+[; <" PLUSW2 equ 0FDBh ;# ">
+"8261
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8261: __asm("PREINC2 equ 0FDCh");
+[; <" PREINC2 equ 0FDCh ;# ">
+"8268
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8268: __asm("POSTDEC2 equ 0FDDh");
+[; <" POSTDEC2 equ 0FDDh ;# ">
+"8275
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8275: __asm("POSTINC2 equ 0FDEh");
+[; <" POSTINC2 equ 0FDEh ;# ">
+"8282
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8282: __asm("INDF2 equ 0FDFh");
+[; <" INDF2 equ 0FDFh ;# ">
+"8289
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8289: __asm("BSR equ 0FE0h");
+[; <" BSR equ 0FE0h ;# ">
+"8296
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8296: __asm("FSR1 equ 0FE1h");
+[; <" FSR1 equ 0FE1h ;# ">
+"8303
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8303: __asm("FSR1L equ 0FE1h");
+[; <" FSR1L equ 0FE1h ;# ">
+"8310
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8310: __asm("FSR1H equ 0FE2h");
+[; <" FSR1H equ 0FE2h ;# ">
+"8317
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8317: __asm("PLUSW1 equ 0FE3h");
+[; <" PLUSW1 equ 0FE3h ;# ">
+"8324
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8324: __asm("PREINC1 equ 0FE4h");
+[; <" PREINC1 equ 0FE4h ;# ">
+"8331
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8331: __asm("POSTDEC1 equ 0FE5h");
+[; <" POSTDEC1 equ 0FE5h ;# ">
+"8338
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8338: __asm("POSTINC1 equ 0FE6h");
+[; <" POSTINC1 equ 0FE6h ;# ">
+"8345
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8345: __asm("INDF1 equ 0FE7h");
+[; <" INDF1 equ 0FE7h ;# ">
+"8352
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8352: __asm("WREG equ 0FE8h");
+[; <" WREG equ 0FE8h ;# ">
+"8359
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8359: __asm("FSR0 equ 0FE9h");
+[; <" FSR0 equ 0FE9h ;# ">
+"8366
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8366: __asm("FSR0L equ 0FE9h");
+[; <" FSR0L equ 0FE9h ;# ">
+"8373
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8373: __asm("FSR0H equ 0FEAh");
+[; <" FSR0H equ 0FEAh ;# ">
+"8380
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8380: __asm("PLUSW0 equ 0FEBh");
+[; <" PLUSW0 equ 0FEBh ;# ">
+"8387
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8387: __asm("PREINC0 equ 0FECh");
+[; <" PREINC0 equ 0FECh ;# ">
+"8394
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8394: __asm("POSTDEC0 equ 0FEDh");
+[; <" POSTDEC0 equ 0FEDh ;# ">
+"8401
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8401: __asm("POSTINC0 equ 0FEEh");
+[; <" POSTINC0 equ 0FEEh ;# ">
+"8408
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8408: __asm("INDF0 equ 0FEFh");
+[; <" INDF0 equ 0FEFh ;# ">
+"8415
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8415: __asm("INTCON3 equ 0FF0h");
+[; <" INTCON3 equ 0FF0h ;# ">
+"8507
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8507: __asm("INTCON2 equ 0FF1h");
+[; <" INTCON2 equ 0FF1h ;# ">
+"8584
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8584: __asm("INTCON equ 0FF2h");
+[; <" INTCON equ 0FF2h ;# ">
+"8701
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8701: __asm("PROD equ 0FF3h");
+[; <" PROD equ 0FF3h ;# ">
+"8708
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8708: __asm("PRODL equ 0FF3h");
+[; <" PRODL equ 0FF3h ;# ">
+"8715
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8715: __asm("PRODH equ 0FF4h");
+[; <" PRODH equ 0FF4h ;# ">
+"8722
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8722: __asm("TABLAT equ 0FF5h");
+[; <" TABLAT equ 0FF5h ;# ">
+"8731
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8731: __asm("TBLPTR equ 0FF6h");
+[; <" TBLPTR equ 0FF6h ;# ">
+"8738
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8738: __asm("TBLPTRL equ 0FF6h");
+[; <" TBLPTRL equ 0FF6h ;# ">
+"8745
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8745: __asm("TBLPTRH equ 0FF7h");
+[; <" TBLPTRH equ 0FF7h ;# ">
+"8752
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8752: __asm("TBLPTRU equ 0FF8h");
+[; <" TBLPTRU equ 0FF8h ;# ">
+"8761
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8761: __asm("PCLAT equ 0FF9h");
+[; <" PCLAT equ 0FF9h ;# ">
+"8768
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8768: __asm("PC equ 0FF9h");
+[; <" PC equ 0FF9h ;# ">
+"8775
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8775: __asm("PCL equ 0FF9h");
+[; <" PCL equ 0FF9h ;# ">
+"8782
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8782: __asm("PCLATH equ 0FFAh");
+[; <" PCLATH equ 0FFAh ;# ">
+"8789
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8789: __asm("PCLATU equ 0FFBh");
+[; <" PCLATU equ 0FFBh ;# ">
+"8796
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8796: __asm("STKPTR equ 0FFCh");
+[; <" STKPTR equ 0FFCh ;# ">
+"8872
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8872: __asm("TOS equ 0FFDh");
+[; <" TOS equ 0FFDh ;# ">
+"8879
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8879: __asm("TOSL equ 0FFDh");
+[; <" TOSL equ 0FFDh ;# ">
+"8886
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8886: __asm("TOSH equ 0FFEh");
+[; <" TOSH equ 0FFEh ;# ">
+"8893
+[; ;C:\Program Files (x86)\Microchip\xc8\v2.10\pic\include\pic18f4550.h: 8893: __asm("TOSU equ 0FFFh");
+[; <" TOSU equ 0FFFh ;# ">
+"65 usb_device_cdc.c
+[; ;usb_device_cdc.c: 65: volatile unsigned char cdc_data_tx[64] __attribute__((address(0x500)));
+[v _cdc_data_tx `Vuc ~T0 @X0 -> 64 `i e@1280 ]
+"66
+[; ;usb_device_cdc.c: 66: volatile unsigned char cdc_data_rx[64] __attribute__((address(0x540)));
+[v _cdc_data_rx `Vuc ~T0 @X0 -> 64 `i e@1344 ]
+"76
+[; ;usb_device_cdc.c: 76: LINE_CODING line_coding;
+[v _line_coding `S421 ~T0 @X0 1 e ]
+"77
+[; ;usb_device_cdc.c: 77: CDC_NOTICE cdc_notice;
+[v _cdc_notice `S430 ~T0 @X0 1 e ]
+"83
+[; ;usb_device_cdc.c: 83: uint8_t cdc_rx_len;
+[v _cdc_rx_len `uc ~T0 @X0 1 e ]
+"84
+[; ;usb_device_cdc.c: 84: uint8_t cdc_trf_state;
+[v _cdc_trf_state `uc ~T0 @X0 1 e ]
+"85
+[; ;usb_device_cdc.c: 85: POINTER pCDCSrc;
+[v _pCDCSrc `S419 ~T0 @X0 1 e ]
+"86
+[; ;usb_device_cdc.c: 86: POINTER pCDCDst;
+[v _pCDCDst `S419 ~T0 @X0 1 e ]
+"87
+[; ;usb_device_cdc.c: 87: uint8_t cdc_tx_len;
+[v _cdc_tx_len `uc ~T0 @X0 1 e ]
+"88
+[; ;usb_device_cdc.c: 88: uint8_t cdc_mem_type;
+[v _cdc_mem_type `uc ~T0 @X0 1 e ]
+"90
+[; ;usb_device_cdc.c: 90: void* CDCDataOutHandle;
+[v _CDCDataOutHandle `*v ~T0 @X0 1 e ]
+"91
+[; ;usb_device_cdc.c: 91: void* CDCDataInHandle;
+[v _CDCDataInHandle `*v ~T0 @X0 1 e ]
+"94
+[; ;usb_device_cdc.c: 94: CONTROL_SIGNAL_BITMAP control_signal_bitmap;
+[v _control_signal_bitmap `S424 ~T0 @X0 1 e ]
+"95
+[; ;usb_device_cdc.c: 95: uint32_t BaudRateGen;
+[v _BaudRateGen `ul ~T0 @X0 1 e ]
+"110
+[; ;usb_device_cdc.c: 110: uint8_t dummy_encapsulated_cmd_response[0x08];
+[v _dummy_encapsulated_cmd_response `uc ~T0 @X0 -> 8 `i e ]
+"147
+[; ;usb_device_cdc.c: 147: void USBCheckCDCRequest(void)
+[v _USBCheckCDCRequest `(v ~T0 @X0 1 ef ]
+"148
+[; ;usb_device_cdc.c: 148: {
+{
+[e :U _USBCheckCDCRequest ]
+[f ]
+"152
+[; ;usb_device_cdc.c: 152:     if(SetupPkt.Recipient != (0x01)) return;
+[e $ ! != -> . . _SetupPkt 2 0 `i -> 1 `i 436  ]
+[e $UE 435  ]
+[e :U 436 ]
+"157
+[; ;usb_device_cdc.c: 157:     if(SetupPkt.RequestType != (0x20>>5)) return;
+[e $ ! != -> . . _SetupPkt 2 1 `i >> -> 32 `i -> 5 `i 437  ]
+[e $UE 435  ]
+[e :U 437 ]
+"163
+[; ;usb_device_cdc.c: 163:     if((SetupPkt.bIntfID != 0x0)&&
+[e $ ! && != -> . . _SetupPkt 7 4 `i -> 0 `i != -> . . _SetupPkt 7 4 `i -> 1 `i 438  ]
+"164
+[; ;usb_device_cdc.c: 164:        (SetupPkt.bIntfID != 0x01)) return;
+[e $UE 435  ]
+[e :U 438 ]
+"166
+[; ;usb_device_cdc.c: 166:     switch(SetupPkt.bRequest)
+[e $U 440  ]
+"167
+[; ;usb_device_cdc.c: 167:     {
+{
+"169
+[; ;usb_device_cdc.c: 169:         case 0x00:
+[e :U 441 ]
+"171
+[; ;usb_device_cdc.c: 171:             inPipes[0].pSrc.bRam = (uint8_t*)&dummy_encapsulated_cmd_response;
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 0 0 -> &U _dummy_encapsulated_cmd_response `*uc ]
+"172
+[; ;usb_device_cdc.c: 172:             inPipes[0].wCount.Val = 0x08;
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 2 0 -> -> 8 `i `us ]
+"173
+[; ;usb_device_cdc.c: 173:             inPipes[0].info.bits.ctrl_trf_mem = 0x01;
+[e = . . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 1 0 0 -> -> 1 `i `uc ]
+"174
+[; ;usb_device_cdc.c: 174:             inPipes[0].info.bits.busy = 1;
+[e = . . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 1 0 3 -> -> 1 `i `uc ]
+"175
+[; ;usb_device_cdc.c: 175:             break;
+[e $U 439  ]
+"176
+[; ;usb_device_cdc.c: 176:         case 0x01:
+[e :U 442 ]
+"178
+[; ;usb_device_cdc.c: 178:             inPipes[0].pSrc.bRam = (uint8_t*)&dummy_encapsulated_cmd_response;
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 0 0 -> &U _dummy_encapsulated_cmd_response `*uc ]
+"179
+[; ;usb_device_cdc.c: 179:             inPipes[0].info.bits.busy = 1;
+[e = . . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 1 0 3 -> -> 1 `i `uc ]
+"180
+[; ;usb_device_cdc.c: 180:             break;
+[e $U 439  ]
+"184
+[; ;usb_device_cdc.c: 184:         case 0x20:
+[e :U 443 ]
+"185
+[; ;usb_device_cdc.c: 185:             outPipes[0].wCount.Val = SetupPkt.wLength;
+[e = . . *U + &U _outPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _outPipes `ui `ux 2 0 . . _SetupPkt 0 4 ]
+"186
+[; ;usb_device_cdc.c: 186:             outPipes[0].pDst.bRam = (uint8_t*)&line_coding._byte[0];
+[e = . . *U + &U _outPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _outPipes `ui `ux 0 0 &U *U + &U . . _line_coding 0 0 * -> -> -> 0 `i `ui `ux -> -> # *U &U . . _line_coding 0 0 `ui `ux ]
+[v F3974 `*F3975 ~T0 @X0 1 t ]
+"187
+[; ;usb_device_cdc.c: 187:             outPipes[0].pFunc = ((void*)0);
+[e = . *U + &U _outPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _outPipes `ui `ux 3 -> -> -> 0 `i `*v `V*F3975 ]
+"188
+[; ;usb_device_cdc.c: 188:             outPipes[0].info.bits.busy = 1;
+[e = . . . *U + &U _outPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _outPipes `ui `ux 1 0 1 -> -> 1 `i `uc ]
+"189
+[; ;usb_device_cdc.c: 189:             break;
+[e $U 439  ]
+"191
+[; ;usb_device_cdc.c: 191:         case 0x21:
+[e :U 444 ]
+"192
+[; ;usb_device_cdc.c: 192:             { inPipes[0].pSrc.bRam = (uint8_t*)&line_coding; inPipes[0].wCount.Val = 0x07; inPipes[0].info.Val = 0x40 | 0x80 | 0x01; };
+{
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 0 0 -> &U _line_coding `*uc ]
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 2 0 -> -> 7 `i `us ]
+[e = . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 1 1 -> | | -> 64 `i -> 128 `i -> 1 `i `uc ]
+}
+"196
+[; ;usb_device_cdc.c: 196:             break;
+[e $U 439  ]
+"198
+[; ;usb_device_cdc.c: 198:         case 0x22:
+[e :U 445 ]
+"199
+[; ;usb_device_cdc.c: 199:             control_signal_bitmap._byte = (uint8_t)SetupPkt.wValue;
+[e = . _control_signal_bitmap 0 -> . . _SetupPkt 0 2 `uc ]
+"231
+[; ;usb_device_cdc.c: 231:             inPipes[0].info.bits.busy = 1;
+[e = . . . *U + &U _inPipes * -> -> -> 0 `i `ui `ux -> -> # *U &U _inPipes `ui `ux 1 0 3 -> -> 1 `i `uc ]
+"232
+[; ;usb_device_cdc.c: 232:             break;
+[e $U 439  ]
+"256
+[; ;usb_device_cdc.c: 256:         default:
+[e :U 446 ]
+"257
+[; ;usb_device_cdc.c: 257:             break;
+[e $U 439  ]
+"258
+[; ;usb_device_cdc.c: 258:     }
+}
+[e $U 439  ]
+[e :U 440 ]
+[e [\ -> . . _SetupPkt 0 1 `i , $ -> 0 `i 441
+ , $ -> 1 `i 442
+ , $ -> 32 `i 443
+ , $ -> 33 `i 444
+ , $ -> 34 `i 445
+ 446 ]
+[e :U 439 ]
+"260
+[; ;usb_device_cdc.c: 260: }
+[e :UE 435 ]
+}
+"294
+[; ;usb_device_cdc.c: 294: void CDCInitEP(void)
+[v _CDCInitEP `(v ~T0 @X0 1 ef ]
+"295
+[; ;usb_device_cdc.c: 295: {
+{
+[e :U _CDCInitEP ]
+[f ]
+"297
+[; ;usb_device_cdc.c: 297:     line_coding.dwDTERate = 19200;
+[e = . . _line_coding 1 0 -> -> -> 19200 `i `l `ul ]
+"298
+[; ;usb_device_cdc.c: 298:     line_coding.bCharFormat = 0x00;
+[e = . . _line_coding 1 1 -> -> 0 `i `uc ]
+"299
+[; ;usb_device_cdc.c: 299:     line_coding.bParityType = 0x00;
+[e = . . _line_coding 1 2 -> -> 0 `i `uc ]
+"300
+[; ;usb_device_cdc.c: 300:     line_coding.bDataBits = 0x08;
+[e = . . _line_coding 1 3 -> -> 8 `i `uc ]
+"302
+[; ;usb_device_cdc.c: 302:     cdc_rx_len = 0;
+[e = _cdc_rx_len -> -> 0 `i `uc ]
+"315
+[; ;usb_device_cdc.c: 315:     USBEnableEndpoint(1,0x02|0x10|0x08);
+[e ( _USBEnableEndpoint (2 , -> -> 1 `i `uc -> | | -> 2 `i -> 16 `i -> 8 `i `uc ]
+"316
+[; ;usb_device_cdc.c: 316:     USBEnableEndpoint(2,0x02|0x04|0x10|0x08);
+[e ( _USBEnableEndpoint (2 , -> -> 2 `i `uc -> | | | -> 2 `i -> 4 `i -> 16 `i -> 8 `i `uc ]
+"318
+[; ;usb_device_cdc.c: 318:     CDCDataOutHandle = USBTransferOnePacket(2,0,(uint8_t*)&cdc_data_rx,sizeof(cdc_data_rx));
+[e = _CDCDataOutHandle ( _USBTransferOnePacket (4 , , , -> -> 2 `i `uc -> -> 0 `i `uc -> &U _cdc_data_rx `*uc -> -> # _cdc_data_rx `ui `uc ]
+"319
+[; ;usb_device_cdc.c: 319:     CDCDataInHandle = ((void*)0);
+[e = _CDCDataInHandle -> -> 0 `i `*v ]
+"346
+[; ;usb_device_cdc.c: 346:     cdc_trf_state = 0;
+[e = _cdc_trf_state -> -> 0 `i `uc ]
+"347
+[; ;usb_device_cdc.c: 347: }
+[e :UE 447 ]
+}
+"424
+[; ;usb_device_cdc.c: 424: _Bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
+[v _USBCDCEventHandler `(a ~T0 @X0 1 ef3`E44`*v`us ]
+"425
+[; ;usb_device_cdc.c: 425: {
+{
+[e :U _USBCDCEventHandler ]
+"424
+[; ;usb_device_cdc.c: 424: _Bool USBCDCEventHandler(USB_EVENT event, void *pdata, uint16_t size)
+[v _event `E44 ~T0 @X0 1 r1 ]
+[v _pdata `*v ~T0 @X0 1 r2 ]
+[v _size `us ~T0 @X0 1 r3 ]
+"425
+[; ;usb_device_cdc.c: 425: {
+[f ]
+"426
+[; ;usb_device_cdc.c: 426:     switch( (uint16_t)event )
+[e $U 450  ]
+"427
+[; ;usb_device_cdc.c: 427:     {
+{
+"428
+[; ;usb_device_cdc.c: 428:         case EVENT_TRANSFER_TERMINATED:
+[e :U 451 ]
+"429
+[; ;usb_device_cdc.c: 429:             if(pdata == CDCDataOutHandle)
+[e $ ! == _pdata _CDCDataOutHandle 452  ]
+"430
+[; ;usb_device_cdc.c: 430:             {
+{
+"431
+[; ;usb_device_cdc.c: 431:                 CDCDataOutHandle = USBTransferOnePacket(2,0,(uint8_t*)&cdc_data_rx,sizeof(cdc_data_rx));
+[e = _CDCDataOutHandle ( _USBTransferOnePacket (4 , , , -> -> 2 `i `uc -> -> 0 `i `uc -> &U _cdc_data_rx `*uc -> -> # _cdc_data_rx `ui `uc ]
+"432
+[; ;usb_device_cdc.c: 432:             }
+}
+[e :U 452 ]
+"433
+[; ;usb_device_cdc.c: 433:             if(pdata == CDCDataInHandle)
+[e $ ! == _pdata _CDCDataInHandle 453  ]
+"434
+[; ;usb_device_cdc.c: 434:             {
+{
+"436
+[; ;usb_device_cdc.c: 436:                 cdc_trf_state = 0;
+[e = _cdc_trf_state -> -> 0 `i `uc ]
+"437
+[; ;usb_device_cdc.c: 437:                 cdc_tx_len = 0;
+[e = _cdc_tx_len -> -> 0 `i `uc ]
+"438
+[; ;usb_device_cdc.c: 438:             }
+}
+[e :U 453 ]
+"439
+[; ;usb_device_cdc.c: 439:             break;
+[e $U 449  ]
+"440
+[; ;usb_device_cdc.c: 440:         default:
+[e :U 454 ]
+"441
+[; ;usb_device_cdc.c: 441:             return 0;
+[e ) -> -> 0 `i `a ]
+[e $UE 448  ]
+"442
+[; ;usb_device_cdc.c: 442:     }
+}
+[e $U 449  ]
+[e :U 450 ]
+[e [\ -> -> _event `us `ui , $ -> . `E304 4 `ui 451
+ 454 ]
+[e :U 449 ]
+"443
+[; ;usb_device_cdc.c: 443:     return 1;
+[e ) -> -> 1 `i `a ]
+[e $UE 448  ]
+"444
+[; ;usb_device_cdc.c: 444: }
+[e :UE 448 ]
+}
+"485
+[; ;usb_device_cdc.c: 485: uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
+[v _getsUSBUSART `(uc ~T0 @X0 1 ef2`*uc`uc ]
+"486
+[; ;usb_device_cdc.c: 486: {
+{
+[e :U _getsUSBUSART ]
+"485
+[; ;usb_device_cdc.c: 485: uint8_t getsUSBUSART(uint8_t *buffer, uint8_t len)
+[v _buffer `*uc ~T0 @X0 1 r1 ]
+[v _len `uc ~T0 @X0 1 r2 ]
+"486
+[; ;usb_device_cdc.c: 486: {
+[f ]
+"487
+[; ;usb_device_cdc.c: 487:     cdc_rx_len = 0;
+[e = _cdc_rx_len -> -> 0 `i `uc ]
+"489
+[; ;usb_device_cdc.c: 489:     if(!((CDCDataOutHandle != 0x0000) && ((*(volatile uint8_t*)CDCDataOutHandle & 0x80) != 0x00)))
+[e $ ! ! && != _CDCDataOutHandle -> -> 0 `i `*v != & -> *U -> _CDCDataOutHandle `*Vuc `i -> 128 `i -> 0 `i 456  ]
+"490
+[; ;usb_device_cdc.c: 490:     {
+{
+"495
+[; ;usb_device_cdc.c: 495:         if(len > (((volatile BDT_ENTRY*)CDCDataOutHandle)->CNT))
+[e $ ! > -> _len `i -> . . *U -> _CDCDataOutHandle `*VS414 0 1 `i 457  ]
+"496
+[; ;usb_device_cdc.c: 496:             len = (((volatile BDT_ENTRY*)CDCDataOutHandle)->CNT);
+[e = _len . . *U -> _CDCDataOutHandle `*VS414 0 1 ]
+[e :U 457 ]
+"501
+[; ;usb_device_cdc.c: 501:         for(cdc_rx_len = 0; cdc_rx_len < len; cdc_rx_len++)
+{
+[e = _cdc_rx_len -> -> 0 `i `uc ]
+[e $U 461  ]
+[e :U 458 ]
+"502
+[; ;usb_device_cdc.c: 502:             buffer[cdc_rx_len] = cdc_data_rx[cdc_rx_len];
+[e = *U + _buffer * -> _cdc_rx_len `ux -> -> # *U _buffer `ui `ux *U + &U _cdc_data_rx * -> _cdc_rx_len `ux -> -> # *U &U _cdc_data_rx `ui `ux ]
+[e ++ _cdc_rx_len -> -> 1 `i `uc ]
+[e :U 461 ]
+[e $ < -> _cdc_rx_len `i -> _len `i 458  ]
+[e :U 459 ]
+}
+"508
+[; ;usb_device_cdc.c: 508:         CDCDataOutHandle = USBTransferOnePacket(2,0,(uint8_t*)&cdc_data_rx,sizeof(cdc_data_rx));
+[e = _CDCDataOutHandle ( _USBTransferOnePacket (4 , , , -> -> 2 `i `uc -> -> 0 `i `uc -> &U _cdc_data_rx `*uc -> -> # _cdc_data_rx `ui `uc ]
+"510
+[; ;usb_device_cdc.c: 510:     }
+}
+[e :U 456 ]
+"512
+[; ;usb_device_cdc.c: 512:     return cdc_rx_len;
+[e ) _cdc_rx_len ]
+[e $UE 455  ]
+"514
+[; ;usb_device_cdc.c: 514: }
+[e :UE 455 ]
+}
+"556
+[; ;usb_device_cdc.c: 556: void putUSBUSART(uint8_t *data, uint8_t length)
+[v _putUSBUSART `(v ~T0 @X0 1 ef2`*uc`uc ]
+"557
+[; ;usb_device_cdc.c: 557: {
+{
+[e :U _putUSBUSART ]
+"556
+[; ;usb_device_cdc.c: 556: void putUSBUSART(uint8_t *data, uint8_t length)
+[v _data `*uc ~T0 @X0 1 r1 ]
+[v _length `uc ~T0 @X0 1 r2 ]
+"557
+[; ;usb_device_cdc.c: 557: {
+[f ]
+"581
+[; ;usb_device_cdc.c: 581:     {PIE2bits.USBIE = 0;};
+{
+[e = . . _PIE2bits 0 5 -> -> 0 `i `uc ]
+}
+"582
+[; ;usb_device_cdc.c: 582:     if(cdc_trf_state == 0)
+[e $ ! == -> _cdc_trf_state `i -> 0 `i 463  ]
+"583
+[; ;usb_device_cdc.c: 583:     {
+{
+"584
+[; ;usb_device_cdc.c: 584:         { pCDCSrc.bRam = (uint8_t*)data; cdc_tx_len = length; cdc_mem_type = 0x01; cdc_trf_state = 1; };
+{
+[e = . _pCDCSrc 2 _data ]
+[e = _cdc_tx_len _length ]
+[e = _cdc_mem_type -> -> 1 `i `uc ]
+[e = _cdc_trf_state -> -> 1 `i `uc ]
+}
+"585
+[; ;usb_device_cdc.c: 585:     }
+}
+[e :U 463 ]
+"586
+[; ;usb_device_cdc.c: 586:     {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"587
+[; ;usb_device_cdc.c: 587: }
+[e :UE 462 ]
+}
+"629
+[; ;usb_device_cdc.c: 629: void putsUSBUSART(char *data)
+[v _putsUSBUSART `(v ~T0 @X0 1 ef1`*uc ]
+"630
+[; ;usb_device_cdc.c: 630: {
+{
+[e :U _putsUSBUSART ]
+"629
+[; ;usb_device_cdc.c: 629: void putsUSBUSART(char *data)
+[v _data `*uc ~T0 @X0 1 r1 ]
+"630
+[; ;usb_device_cdc.c: 630: {
+[f ]
+"631
+[; ;usb_device_cdc.c: 631:     uint8_t len;
+[v _len `uc ~T0 @X0 1 a ]
+"632
+[; ;usb_device_cdc.c: 632:     char *pData;
+[v _pData `*uc ~T0 @X0 1 a ]
+"657
+[; ;usb_device_cdc.c: 657:     {PIE2bits.USBIE = 0;};
+{
+[e = . . _PIE2bits 0 5 -> -> 0 `i `uc ]
+}
+"658
+[; ;usb_device_cdc.c: 658:     if(cdc_trf_state != 0)
+[e $ ! != -> _cdc_trf_state `i -> 0 `i 465  ]
+"659
+[; ;usb_device_cdc.c: 659:     {
+{
+"660
+[; ;usb_device_cdc.c: 660:         {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"661
+[; ;usb_device_cdc.c: 661:         return;
+[e $UE 464  ]
+"662
+[; ;usb_device_cdc.c: 662:     }
+}
+[e :U 465 ]
+"668
+[; ;usb_device_cdc.c: 668:     len = 0;
+[e = _len -> -> 0 `i `uc ]
+"669
+[; ;usb_device_cdc.c: 669:     pData = data;
+[e = _pData _data ]
+"670
+[; ;usb_device_cdc.c: 670:     do
+[e :U 468 ]
+"671
+[; ;usb_device_cdc.c: 671:     {
+{
+"672
+[; ;usb_device_cdc.c: 672:         len++;
+[e ++ _len -> -> 1 `i `uc ]
+"673
+[; ;usb_device_cdc.c: 673:         if(len == 255) break;
+[e $ ! == -> _len `i -> 255 `i 469  ]
+[e $U 467  ]
+[e :U 469 ]
+"674
+[; ;usb_device_cdc.c: 674:     }while(*pData++);
+}
+[e $ != -> *U ++ _pData * -> -> 1 `i `x -> -> # *U _pData `i `x `i -> 0 `i 468  ]
+[e :U 467 ]
+"682
+[; ;usb_device_cdc.c: 682:     { pCDCSrc.bRam = (uint8_t*)data; cdc_tx_len = len; cdc_mem_type = 0x01; cdc_trf_state = 1; };
+{
+[e = . _pCDCSrc 2 -> _data `*uc ]
+[e = _cdc_tx_len _len ]
+[e = _cdc_mem_type -> -> 1 `i `uc ]
+[e = _cdc_trf_state -> -> 1 `i `uc ]
+}
+"683
+[; ;usb_device_cdc.c: 683:     {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"684
+[; ;usb_device_cdc.c: 684: }
+[e :UE 464 ]
+}
+"726
+[; ;usb_device_cdc.c: 726: void putrsUSBUSART(const char *data)
+[v _putrsUSBUSART `(v ~T0 @X0 1 ef1`*Cuc ]
+"727
+[; ;usb_device_cdc.c: 727: {
+{
+[e :U _putrsUSBUSART ]
+"726
+[; ;usb_device_cdc.c: 726: void putrsUSBUSART(const char *data)
+[v _data `*Cuc ~T0 @X0 1 r1 ]
+"727
+[; ;usb_device_cdc.c: 727: {
+[f ]
+"728
+[; ;usb_device_cdc.c: 728:     uint8_t len;
+[v _len `uc ~T0 @X0 1 a ]
+"729
+[; ;usb_device_cdc.c: 729:     const char *pData;
+[v _pData `*Cuc ~T0 @X0 1 a ]
+"754
+[; ;usb_device_cdc.c: 754:     {PIE2bits.USBIE = 0;};
+{
+[e = . . _PIE2bits 0 5 -> -> 0 `i `uc ]
+}
+"755
+[; ;usb_device_cdc.c: 755:     if(cdc_trf_state != 0)
+[e $ ! != -> _cdc_trf_state `i -> 0 `i 471  ]
+"756
+[; ;usb_device_cdc.c: 756:     {
+{
+"757
+[; ;usb_device_cdc.c: 757:         {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"758
+[; ;usb_device_cdc.c: 758:         return;
+[e $UE 470  ]
+"759
+[; ;usb_device_cdc.c: 759:     }
+}
+[e :U 471 ]
+"765
+[; ;usb_device_cdc.c: 765:     len = 0;
+[e = _len -> -> 0 `i `uc ]
+"766
+[; ;usb_device_cdc.c: 766:     pData = data;
+[e = _pData _data ]
+"767
+[; ;usb_device_cdc.c: 767:     do
+[e :U 474 ]
+"768
+[; ;usb_device_cdc.c: 768:     {
+{
+"769
+[; ;usb_device_cdc.c: 769:         len++;
+[e ++ _len -> -> 1 `i `uc ]
+"770
+[; ;usb_device_cdc.c: 770:         if(len == 255) break;
+[e $ ! == -> _len `i -> 255 `i 475  ]
+[e $U 473  ]
+[e :U 475 ]
+"771
+[; ;usb_device_cdc.c: 771:     }while(*pData++);
+}
+[e $ != -> *U ++ _pData * -> -> 1 `i `x -> -> # *U _pData `i `x `i -> 0 `i 474  ]
+[e :U 473 ]
+"780
+[; ;usb_device_cdc.c: 780:     { pCDCSrc.bRom = (const uint8_t*)data; cdc_tx_len = len; cdc_mem_type = 0x00; cdc_trf_state = 1; };
+{
+[e = . _pCDCSrc 4 -> _data `*Cuc ]
+[e = _cdc_tx_len _len ]
+[e = _cdc_mem_type -> -> 0 `i `uc ]
+[e = _cdc_trf_state -> -> 1 `i `uc ]
+}
+"781
+[; ;usb_device_cdc.c: 781:     {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"783
+[; ;usb_device_cdc.c: 783: }
+[e :UE 470 ]
+}
+"836
+[; ;usb_device_cdc.c: 836: void CDCTxService(void)
+[v _CDCTxService `(v ~T0 @X0 1 ef ]
+"837
+[; ;usb_device_cdc.c: 837: {
+{
+[e :U _CDCTxService ]
+[f ]
+"838
+[; ;usb_device_cdc.c: 838:     uint8_t byte_to_send;
+[v _byte_to_send `uc ~T0 @X0 1 a ]
+"839
+[; ;usb_device_cdc.c: 839:     uint8_t i;
+[v _i `uc ~T0 @X0 1 a ]
+"841
+[; ;usb_device_cdc.c: 841:     {PIE2bits.USBIE = 0;};
+{
+[e = . . _PIE2bits 0 5 -> -> 0 `i `uc ]
+}
+"843
+[; ;usb_device_cdc.c: 843:     {};
+{
+}
+"845
+[; ;usb_device_cdc.c: 845:     if(((CDCDataInHandle != 0x0000) && ((*(volatile uint8_t*)CDCDataInHandle & 0x80) != 0x00)))
+[e $ ! && != _CDCDataInHandle -> -> 0 `i `*v != & -> *U -> _CDCDataInHandle `*Vuc `i -> 128 `i -> 0 `i 477  ]
+"846
+[; ;usb_device_cdc.c: 846:     {
+{
+"847
+[; ;usb_device_cdc.c: 847:         {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"848
+[; ;usb_device_cdc.c: 848:         return;
+[e $UE 476  ]
+"849
+[; ;usb_device_cdc.c: 849:     }
+}
+[e :U 477 ]
+"856
+[; ;usb_device_cdc.c: 856:     if(cdc_trf_state == 3)
+[e $ ! == -> _cdc_trf_state `i -> 3 `i 478  ]
+"857
+[; ;usb_device_cdc.c: 857:         cdc_trf_state = 0;
+[e = _cdc_trf_state -> -> 0 `i `uc ]
+[e :U 478 ]
+"862
+[; ;usb_device_cdc.c: 862:     if(cdc_trf_state == 0)
+[e $ ! == -> _cdc_trf_state `i -> 0 `i 479  ]
+"863
+[; ;usb_device_cdc.c: 863:     {
+{
+"864
+[; ;usb_device_cdc.c: 864:         {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"865
+[; ;usb_device_cdc.c: 865:         return;
+[e $UE 476  ]
+"866
+[; ;usb_device_cdc.c: 866:     }
+}
+[e :U 479 ]
+"871
+[; ;usb_device_cdc.c: 871:     if(cdc_trf_state == 2)
+[e $ ! == -> _cdc_trf_state `i -> 2 `i 480  ]
+"872
+[; ;usb_device_cdc.c: 872:     {
+{
+"873
+[; ;usb_device_cdc.c: 873:         CDCDataInHandle = USBTransferOnePacket(2,1,((void*)0),0);
+[e = _CDCDataInHandle ( _USBTransferOnePacket (4 , , , -> -> 2 `i `uc -> -> 1 `i `uc -> -> -> 0 `i `*v `*uc -> -> 0 `i `uc ]
+"875
+[; ;usb_device_cdc.c: 875:         cdc_trf_state = 3;
+[e = _cdc_trf_state -> -> 3 `i `uc ]
+"876
+[; ;usb_device_cdc.c: 876:     }
+}
+[e $U 481  ]
+"877
+[; ;usb_device_cdc.c: 877:     else if(cdc_trf_state == 1)
+[e :U 480 ]
+[e $ ! == -> _cdc_trf_state `i -> 1 `i 482  ]
+"878
+[; ;usb_device_cdc.c: 878:     {
+{
+"882
+[; ;usb_device_cdc.c: 882:      if(cdc_tx_len > sizeof(cdc_data_tx))
+[e $ ! > -> _cdc_tx_len `ui -> # _cdc_data_tx `ui 483  ]
+"883
+[; ;usb_device_cdc.c: 883:          byte_to_send = sizeof(cdc_data_tx);
+[e = _byte_to_send -> -> # _cdc_data_tx `ui `uc ]
+[e $U 484  ]
+"884
+[; ;usb_device_cdc.c: 884:      else
+[e :U 483 ]
+"885
+[; ;usb_device_cdc.c: 885:          byte_to_send = cdc_tx_len;
+[e = _byte_to_send _cdc_tx_len ]
+[e :U 484 ]
+"890
+[; ;usb_device_cdc.c: 890:      cdc_tx_len = cdc_tx_len - byte_to_send;
+[e = _cdc_tx_len -> - -> _cdc_tx_len `i -> _byte_to_send `i `uc ]
+"892
+[; ;usb_device_cdc.c: 892:         pCDCDst.bRam = (uint8_t*)&cdc_data_tx;
+[e = . _pCDCDst 2 -> &U _cdc_data_tx `*uc ]
+"894
+[; ;usb_device_cdc.c: 894:         i = byte_to_send;
+[e = _i _byte_to_send ]
+"895
+[; ;usb_device_cdc.c: 895:         if(cdc_mem_type == 0x00)
+[e $ ! == -> _cdc_mem_type `i -> 0 `i 485  ]
+"896
+[; ;usb_device_cdc.c: 896:         {
+{
+"897
+[; ;usb_device_cdc.c: 897:             while(i)
+[e $U 486  ]
+[e :U 487 ]
+"898
+[; ;usb_device_cdc.c: 898:             {
+{
+"899
+[; ;usb_device_cdc.c: 899:                 *pCDCDst.bRam = *pCDCSrc.bRom;
+[e = *U . _pCDCDst 2 *U . _pCDCSrc 4 ]
+"900
+[; ;usb_device_cdc.c: 900:                 pCDCDst.bRam++;
+[e ++ . _pCDCDst 2 * -> -> 1 `i `x -> -> # *U . _pCDCDst 2 `i `x ]
+"901
+[; ;usb_device_cdc.c: 901:                 pCDCSrc.bRom++;
+[e ++ . _pCDCSrc 4 * -> -> 1 `i `x -> -> # *U . _pCDCSrc 4 `i `x ]
+"902
+[; ;usb_device_cdc.c: 902:                 i--;
+[e -- _i -> -> 1 `i `uc ]
+"903
+[; ;usb_device_cdc.c: 903:             }
+}
+[e :U 486 ]
+"897
+[; ;usb_device_cdc.c: 897:             while(i)
+[e $ != -> _i `i -> 0 `i 487  ]
+[e :U 488 ]
+"904
+[; ;usb_device_cdc.c: 904:         }
+}
+[e $U 489  ]
+"905
+[; ;usb_device_cdc.c: 905:         else
+[e :U 485 ]
+"906
+[; ;usb_device_cdc.c: 906:         {
+{
+"907
+[; ;usb_device_cdc.c: 907:             while(i)
+[e $U 490  ]
+[e :U 491 ]
+"908
+[; ;usb_device_cdc.c: 908:             {
+{
+"909
+[; ;usb_device_cdc.c: 909:                 *pCDCDst.bRam = *pCDCSrc.bRam;
+[e = *U . _pCDCDst 2 *U . _pCDCSrc 2 ]
+"910
+[; ;usb_device_cdc.c: 910:                 pCDCDst.bRam++;
+[e ++ . _pCDCDst 2 * -> -> 1 `i `x -> -> # *U . _pCDCDst 2 `i `x ]
+"911
+[; ;usb_device_cdc.c: 911:                 pCDCSrc.bRam++;
+[e ++ . _pCDCSrc 2 * -> -> 1 `i `x -> -> # *U . _pCDCSrc 2 `i `x ]
+"912
+[; ;usb_device_cdc.c: 912:                 i--;
+[e -- _i -> -> 1 `i `uc ]
+"913
+[; ;usb_device_cdc.c: 913:             }
+}
+[e :U 490 ]
+"907
+[; ;usb_device_cdc.c: 907:             while(i)
+[e $ != -> _i `i -> 0 `i 491  ]
+[e :U 492 ]
+"914
+[; ;usb_device_cdc.c: 914:         }
+}
+[e :U 489 ]
+"920
+[; ;usb_device_cdc.c: 920:         if(cdc_tx_len == 0)
+[e $ ! == -> _cdc_tx_len `i -> 0 `i 493  ]
+"921
+[; ;usb_device_cdc.c: 921:         {
+{
+"922
+[; ;usb_device_cdc.c: 922:             if(byte_to_send == 64)
+[e $ ! == -> _byte_to_send `i -> 64 `i 494  ]
+"923
+[; ;usb_device_cdc.c: 923:                 cdc_trf_state = 2;
+[e = _cdc_trf_state -> -> 2 `i `uc ]
+[e $U 495  ]
+"924
+[; ;usb_device_cdc.c: 924:             else
+[e :U 494 ]
+"925
+[; ;usb_device_cdc.c: 925:                 cdc_trf_state = 3;
+[e = _cdc_trf_state -> -> 3 `i `uc ]
+[e :U 495 ]
+"926
+[; ;usb_device_cdc.c: 926:         }
+}
+[e :U 493 ]
+"927
+[; ;usb_device_cdc.c: 927:         CDCDataInHandle = USBTransferOnePacket(2,1,(uint8_t*)&cdc_data_tx,byte_to_send);
+[e = _CDCDataInHandle ( _USBTransferOnePacket (4 , , , -> -> 2 `i `uc -> -> 1 `i `uc -> &U _cdc_data_tx `*uc _byte_to_send ]
+"929
+[; ;usb_device_cdc.c: 929:     }
+}
+[e :U 482 ]
+[e :U 481 ]
+"931
+[; ;usb_device_cdc.c: 931:     {PIE2bits.USBIE = 1;};
+{
+[e = . . _PIE2bits 0 5 -> -> 1 `i `uc ]
+}
+"932
+[; ;usb_device_cdc.c: 932: }
+[e :UE 476 ]
+}

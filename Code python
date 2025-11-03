@@ -1,323 +1,306 @@
-# gui.py
 import threading
 import serial
 import tkinter as tk
 import random
-from PIL import Image, ImageTk  # Pour redimensionner l'image
+from PIL import Image, ImageTk, Image
 
 class FlappyGUI:
+
+    # ---------------- COMMUNICATION ----------------
     def init_serial_thread(self):
         """Initialise le port série et démarre un thread pour lire le PIC"""
         try:
-            self.ser = serial.Serial('COM4', 9600, timeout=0.1)
+            self.ser = serial.Serial('COM13', 9600, timeout=0.1)
         except serial.SerialException:
-            print("Erreur : impossible d'ouvrir le port série COM12")
+            print("Erreur : impossible d'ouvrir le port série COM13")
+            self.ser = None
             return
-        
         thread = threading.Thread(target=self.read_pic, daemon=True)
         thread.start()
 
     def read_pic(self):
         """Boucle pour lire les commandes du PIC"""
         while True:
-            if self.ser.in_waiting:
+            if self.ser and self.ser.in_waiting:
                 try:
-                    data = self.ser.readline().decode(errors='ignore').strip()
-                except UnicodeDecodeError:
-                    continue
+                    data = self.ser.readline().decode().strip()
+                    if data == "FLAP":
+                        self.root.after(0, self.on_space_press, None)
+                except:
+                    pass  # Ignore les erreurs USB
 
-                data = data.upper()
-                if data == "FLAP":
-                    self.root.after(0, self.flap)
-                elif data == "PAUSE":
-                    self.root.after(0, self.pause_game)
-                elif data == "REPRENDRE":
-                    self.root.after(0, self.resume_game)
-                elif data == "QUITTER":
-                    self.root.after(0, self.quit_to_home)
-
+    # ---------------- INITIALISATION ----------------
     def __init__(self, root, start_callback=None):
-        """Interface principale du jeu Flappy Bird"""
         self.root = root
-        self.root.title("Flappy Bird")
+        self.root.title("Flappy Goku")
         self.root.attributes("-fullscreen", True)
-        self.root.bind("<Escape>", lambda e: self.root.destroy())  # Échap pour quitter
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
         self.start_callback = start_callback
-        self.paused = False  # Indique si le jeu est en pause
+        self.best_score = 0
+        self.ser = None
         self.start_page()
 
-    # --- Page d'accueil ---
+    # ---------------- MENU ----------------
     def start_page(self):
-        """Page d’accueil : Press Start + Quitter"""
+        self.clear()
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # Image de fond
+        bg_img = Image.open("fond.png").resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+        self.bg_start_img = ImageTk.PhotoImage(bg_img)
+        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_start_img)
+
+        # Overlay semi-transparent
+        overlay = Image.new("RGBA", (500, 400), (0, 0, 0, 150))
+        self.overlay_img = ImageTk.PhotoImage(overlay)
+        self.canvas.create_image(screen_width / 2, screen_height / 2, image=self.overlay_img, anchor="center")
+
+        # Texte titre
+        self.canvas.create_text(screen_width / 2, screen_height / 2 - 120, text="Flappy Goku", font=("Arial", 40, "bold"), fill="white")
+
+        # Boutons
+        btn_start = tk.Button(self.root, text="Play", font=("Arial", 16, "bold"), bg="#FFD700", fg="black", command=self.start_game)
+        btn_regle = tk.Button(self.root, text="Règle du jeu", font=("Arial", 16, "bold"), bg="#3C00FF", fg="black", command=self.regle)
+        btn_quit = tk.Button(self.root, text="Quitter", font=("Arial", 16, "bold"), bg="#FF4C4C", fg="white", command=self.quit_game)
+
+        self.canvas.create_window(screen_width / 2, screen_height / 2, window=btn_start)
+        self.canvas.create_window(screen_width / 2, screen_height / 2 + 60, window=btn_regle)
+        self.canvas.create_window(screen_width / 2, screen_height / 2 + 120, window=btn_quit)
+
+    # ---------------- PAGE REGLE ----------------
+    def regle(self):
+        self.clear()
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
 
-        self.clear()
-
-    
-        self.canvas = tk.Canvas(self.root,
-                            width=self.root.winfo_screenwidth(),
-                            height=self.root.winfo_screenheight(),
-                            bg="#87CEEB",
-                            highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, width=screen_w, height=screen_h, bg="#2196F3", highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
 
-    # Rectangle gauche
-        left_rect_width = 80
-        left_rect_height = 300
-        left_rect_x = 100
-        left_rect_y = 0
-        self.canvas.create_rectangle(
-        left_rect_x, left_rect_y,
-        left_rect_x + left_rect_width, left_rect_y + left_rect_height,
-        fill="green", outline=""
-    )
+        self.canvas.create_text(screen_w // 2, 100, text="Règles du jeu !", font=("Arial", 32, "bold"), fill="black")
 
-    # Rectangle droit 
-        right_rect_width = 80
-        right_rect_height = 300
-        right_rect_x = 1000
-        right_rect_y = 450
-        self.canvas.create_rectangle(
-        right_rect_x, right_rect_y,
-        right_rect_x + right_rect_width, right_rect_y + right_rect_height,
-        fill="green", outline=""
-    )
-    # Titre
-        self.canvas.create_text(self.root.winfo_screenwidth() // 2, 150,
-                            text="Flappy Bird",
-                            font=("Arial", 28, "bold"),
-                            fill="black")
+        regles = (
+            "\n\n\n\n\n"
+            " Le but du jeu est simple :\n\n"
+            " Fais voler Goku sans qu’il touche les Kamehameha !\n\n"
+            "Appuie sur RD0 pour le faire voler\n"
+            "Appuie sur RD1 pour mettre pause\n"
+            "Appuie sur RD2 pour reprendre\n"
+            "Appuie sur RD3 pour revenir au menu\n"
+            "Si tu touches le sol ou un Kamehameha, c’est perdu !\n"
+        )
 
-    # Boutons
-        btn_start = tk.Button(self.root,
-                          text="Press Start",
-                          font=("Arial", 16, "bold"),
-                          bg="#FFD700", fg="black",
-                          relief="raised", bd=4,
-                          command=self.start_game)
-        self.canvas.create_window(self.root.winfo_screenwidth() // 2, 300, window=btn_start)
+        self.canvas.create_text(screen_w // 2, screen_h // 2 - 50, text=regles, font=("Arial", 20), fill="black", justify="center", width=800)
 
+        btn_retour = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"), bg="#FFD700", fg="black", relief="raised", bd=4, command=self.start_page)
+        self.canvas.create_window(screen_w // 2, screen_h - 100, window=btn_retour)
 
-        btn_règle = tk.Button(self.root,
-                          text="Règle du jeu",
-                          font=("Arial", 16, "bold"),
-                          bg="#3C00FF", fg="black",
-                          relief="raised", bd=4,
-                          command=self.regle)
-        self.canvas.create_window(self.root.winfo_screenwidth() // 2, 380, window=btn_règle)
-
-
-        btn_quit = tk.Button(self.root,
-                         text="Quitter",
-                         font=("Arial", 16, "bold"),
-                         bg="#FF4C4C", fg="white",
-                         relief="raised", bd=4,
-                         command=self.quit_game)
-        self.canvas.create_window(self.root.winfo_screenwidth() // 2, 460, window=btn_quit)
-
-        self.clouds = []
-        for i in range(5):
-            x = random.randint(0, screen_w)
-            y = random.randint(50, screen_h // 2)
-            cloud = self.draw_cloud(x, y, scale=random.uniform(0.8, 1.5))
-            self.clouds.append((cloud, random.randint(1, 3)))  # id et vitesse
-
-    # Démarrer l'animation des nuages
-        self.animate_clouds()
-
-    def draw_cloud(self, x, y, scale=1.0):
-        """Dessine un nuage et retourne un groupe d'IDs"""
-        ids = []
-        ids.append(self.canvas.create_oval(x, y, x + 60*scale, y + 40*scale, fill="white", outline=""))
-        ids.append(self.canvas.create_oval(x + 30*scale, y - 20*scale, x + 90*scale, y + 30*scale, fill="white", outline=""))
-        ids.append(self.canvas.create_oval(x + 60*scale, y, x + 120*scale, y + 50*scale, fill="white", outline=""))
-        return ids
-
-    def animate_clouds(self):
-        """Déplace tous les nuages vers la gauche et boucle"""
-        screen_w = self.root.winfo_screenwidth()
-        for cloud_group, speed in self.clouds:
-            for cid in cloud_group:
-                self.canvas.move(cid, -speed, 0)
-                x1, y1, x2, y2 = self.canvas.coords(cid)
-                if x2 < 0:  # si le nuage sort à gauche, le remettre à droite
-                    self.canvas.move(cid, screen_w + (x2 - x1), 0)
-        self.root.after(50, self.animate_clouds)
-
+    # ---------------- JEU ----------------
     def start_game(self):
-
-        """Appelée quand on clique sur 'Press Start'"""
         if self.start_callback:
             self.start_callback()
         else:
             self.game_page()
-            self.init_serial_thread()  # ← Lecture PIC18F
+            self.init_serial_thread()
 
-
-    def regle(self):
-            """Affiche la page des règles du jeu"""
-            self.clear()
-            screen_w = self.root.winfo_screenwidth()
-            screen_h = self.root.winfo_screenheight()
-
-        # Canvas de fond
-            self.canvas = tk.Canvas(self.root,
-                                width=screen_w,
-                                height=screen_h,
-                                bg="#2196F3",
-                                highlightthickness=0)
-            self.canvas.pack(fill="both", expand=True)
-
-        # Titre
-            self.canvas.create_text(screen_w // 2, 100,
-                                text="Règles du jeu !",
-                                font=("Arial", 32, "bold"),
-                                fill="black")
-
-        # Instructions
-            regles = (
-                "\n\n\n\n\n"
-                " Le but du jeu est simple :\n\n"
-                " Fais voler ton oiseau sans qu’il touche les tuyaux !\n\n"
-                "Appuies sur RD0 pour le faire voler\n\n"
-                "Appuies sur RD1 pour mettre pause\n\n"
-                "Appuies sur RD2 pour reprendre\n\n"
-                "Appuies sur RD3 pour revenir au menu\n\n"
-                "Si tu touches le sol ou un tuyau, c’est perdu !\n\n"
-                
-                )
-
-            self.canvas.create_text(screen_w // 2, screen_h // 2 - 50,
-                                text=regles,
-                                font=("Arial", 20),
-                                fill="black",
-                                justify="center",
-                                width=800)
-
-        # Bouton Retour
-            btn_retour = tk.Button(self.root,
-                               text="Retour au menu",
-                               font=("Arial", 16, "bold"),
-                               bg="#FFD700",
-                               fg="black",
-                               relief="raised",
-                               bd=4,
-                               command=self.start_page)
-            self.canvas.create_window(screen_w // 2, screen_h - 100, window=btn_retour)
-
-    
-
-    # --- Page du jeu ---
     def game_page(self):
-        """Fenêtre principale du jeu"""
         self.clear()
-        self.canvas = tk.Canvas(self.root, width=self.root.winfo_screenwidth(),
-                                height=self.root.winfo_screenheight(), bg="#70C5CE")
+        self.canvas = tk.Canvas(self.root, width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight(), highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
 
+        # Fond
+        bg_img = Image.open("fond.png").resize((self.screen_width, self.screen_height), Image.Resampling.LANCZOS)
+        self.bg_img = ImageTk.PhotoImage(bg_img)
+        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_img)
+
         # Sol
-        self.ground = self.canvas.create_rectangle(0, self.screen_height - 50,
-                                                   self.screen_width, self.screen_height,
-                                                   fill="#DEB887", outline="")
+        self.ground = self.canvas.create_rectangle(0, self.screen_height - 50, self.screen_width, self.screen_height, fill="#DEB887", outline="")
 
-        # Bird
-        self.bird_size = 50
-        self.bird_x = 100
+        # Goku (oiseau)
+        self.bird_size = 100
+        self.bird_x = 200
         self.bird_y = self.screen_height // 2
-
-        img = Image.open("bird.png")
-        img = img.resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS)
+        img = Image.open("goku2.png").resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS)
         self.bird_img = ImageTk.PhotoImage(img)
         self.bird = self.canvas.create_image(self.bird_x, self.bird_y, anchor="nw", image=self.bird_img)
 
-        # Pipes
+        # Tuyaux/Kamehameha
         self.pipes = []
-        for i in range(2):
-            x = self.screen_width + i * (self.screen_width // 2)
+        self.pipe_images = []
+        pipe_count = 5
+        x = self.bird_x + 500
+        self.min_distance = 250
+        self.max_distance = 400
+        for i in range(pipe_count):
             self.create_pipe(x)
+            x += random.randint(self.min_distance, self.max_distance)
+
+        # Score
+        self.passed_dict = {}
+        for top, bottom in self.pipes:
+            self.passed_dict[top] = False
+        self.score = 0
+        self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: {self.score}", font=("Arial", 24, "bold"), fill="white", anchor="ne")
 
         # Physique
         self.velocity = 0
         self.gravity = 1
         self.flap_strength = -15
 
-        # Bind clavier
         self.root.bind("<space>", self.on_space_press)
-
-        # Démarrer la boucle
         self.update_game()
 
-    # --- Gestion des pipes ---
+    # ---------------- PIPES ----------------
     def create_pipe(self, x):
-        gap = random.randint(150, 250)
+        gap = random.randint(180, 250)
         top_height = random.randint(100, self.screen_height - gap - 100)
         bottom_y = top_height + gap
         pipe_width = 100
-        top = self.canvas.create_rectangle(x, 0, x + pipe_width, top_height, fill="green", outline="black")
-        bottom = self.canvas.create_rectangle(x, bottom_y, x + pipe_width, self.screen_height, fill="green", outline="black")
+
+        img_top = Image.open("tuyau1.png").resize((pipe_width, top_height), Image.Resampling.LANCZOS)
+        img_bottom = Image.open("tuyau2.png").resize((pipe_width, self.screen_height - bottom_y), Image.Resampling.LANCZOS)
+
+        top_tk = ImageTk.PhotoImage(img_top)
+        bottom_tk = ImageTk.PhotoImage(img_bottom)
+
+        top = self.canvas.create_image(x, 0, anchor="nw", image=top_tk)
+        bottom = self.canvas.create_image(x, bottom_y, anchor="nw", image=bottom_tk)
+
         self.pipes.append((top, bottom))
+        self.pipe_images.extend([top_tk, bottom_tk])
 
     def move_pipes(self):
         speed = 8
-        for top, bottom in list(self.pipes):
+        bird_x = self.canvas.coords(self.bird)[0]
+
+        for top, bottom in self.pipes:
             self.canvas.move(top, -speed, 0)
             self.canvas.move(bottom, -speed, 0)
-            x1, _, x2, _ = self.canvas.coords(top)
-            if x2 < 0:
-                self.canvas.delete(top)
-                self.canvas.delete(bottom)
-                self.pipes.remove((top, bottom))
-                self.create_pipe(self.screen_width)
 
-    # --- Boucle principale ---
+            tx1, ty1 = self.canvas.coords(top)
+            if not self.passed_dict[top] and tx1 + 100 < bird_x:
+                self.score += 1
+                self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
+                self.passed_dict[top] = True
+
+        rightmost_x = max(self.canvas.coords(p[0])[0] for p in self.pipes)
+        for top, bottom in self.pipes:
+            x1, y1 = self.canvas.coords(top)
+            if x1 + 100 < 0:
+                gap = random.randint(180, 250)
+                top_height = random.randint(100, self.screen_height - gap - 100)
+                bottom_y = top_height + gap
+                pipe_width = 100
+
+                img_top = Image.open("tuyau1.png").resize((pipe_width, top_height), Image.Resampling.LANCZOS)
+                img_bottom = Image.open("tuyau2.png").resize((pipe_width, self.screen_height - bottom_y), Image.Resampling.LANCZOS)
+
+                top_tk = ImageTk.PhotoImage(img_top)
+                bottom_tk = ImageTk.PhotoImage(img_bottom)
+
+                new_x = rightmost_x + random.randint(self.min_distance, self.max_distance)
+                self.canvas.coords(top, new_x, 0)
+                self.canvas.coords(bottom, new_x, bottom_y)
+                self.canvas.itemconfig(top, image=top_tk)
+                self.canvas.itemconfig(bottom, image=bottom_tk)
+
+                self.pipe_images.extend([top_tk, bottom_tk])
+                self.passed_dict[top] = False
+                rightmost_x = new_x
+
+    # ---------------- COLLISION ----------------
+    def check_collision(self):
+        bird_margin_x = 30
+        bird_margin_y = 30
+        bird_x1, bird_y1, bird_x2, bird_y2 = self.canvas.bbox(self.bird)
+        bird_x1 += bird_margin_x
+        bird_y1 += bird_margin_y
+        bird_x2 -= bird_margin_x
+        bird_y2 -= bird_margin_y
+
+        if bird_y1 <= 0 or bird_y2 >= self.screen_height - 50:
+            return True
+
+        pipe_margin_x = 20
+        pipe_margin_y = 20
+
+        for top, bottom in self.pipes:
+            tx1, ty1, tx2, ty2 = self.canvas.bbox(top)
+            tx1 += pipe_margin_x
+            ty1 += pipe_margin_y
+            tx2 -= pipe_margin_x
+            ty2 -= pipe_margin_y
+
+            bx1, by1, bx2, by2 = self.canvas.bbox(bottom)
+            bx1 += pipe_margin_x
+            by1 += pipe_margin_y
+            bx2 -= pipe_margin_x
+            by2 -= pipe_margin_y
+
+            if bird_x2 > tx1 and bird_x1 < tx2 and bird_y1 < ty2:
+                return True
+            if bird_x2 > bx1 and bird_x1 < bx2 and bird_y2 > by1:
+                return True
+
+        return False
+
     def update_game(self):
-        if not self.paused:
-            self.velocity += self.gravity
-            self.canvas.move(self.bird, 0, self.velocity)
+        self.velocity += self.gravity
+        self.canvas.move(self.bird, 0, self.velocity)
+        x, y = self.canvas.coords(self.bird)
+        if y >= self.screen_height - 50 - self.bird_size:
+            self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
+            self.velocity = 0
+        elif y <= 0:
+            self.canvas.coords(self.bird, self.bird_x, 0)
+            self.velocity = 0
+        self.move_pipes()
+        if self.check_collision():
+            self.end_game()
+        else:
+            self.canvas.after(30, self.update_game)
 
-            x, y = self.canvas.coords(self.bird)
+    # ---------------- GAME OVER ----------------
+    def end_game(self):
+        if self.score > self.best_score:
+            self.best_score = self.score
+        self.clear()
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        bg_img = Image.open("fond.png").resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+        self.bg_over_img = ImageTk.PhotoImage(bg_img)
+        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_over_img)
+        overlay = Image.new("RGBA", (500, 400), (0, 0, 0, 180))
+        self.overlay_gameover = ImageTk.PhotoImage(overlay)
+        self.canvas.create_image(screen_width / 2, screen_height / 2, image=self.overlay_gameover, anchor="center")
+        self.canvas.create_text(screen_width / 2, screen_height / 2 - 100, text="Game Over", font=("Arial", 40, "bold"), fill="white")
+        self.canvas.create_text(screen_width / 2, screen_height / 2 - 40, text=f"Score : {self.score}", font=("Arial", 24, "bold"), fill="white")
+        self.canvas.create_text(screen_width / 2, screen_height / 2 + 0, text=f"Best : {self.best_score}", font=("Arial",24, "bold"), fill="white")
 
-            if y >= self.screen_height - 50 - self.bird_size:
-                self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
-                self.velocity = 0
-            elif y <= 0:
-                self.canvas.coords(self.bird, self.bird_x, 0)
-                self.velocity = 0
+        btn_menu = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"), bg="#FFD700", fg="black", command=self.start_page)
+        btn_quit = tk.Button(self.root, text="Quitter", font=("Arial", 16, "bold"), bg="#FF4C4C", fg="white", command=self.quit_game)
+        self.canvas.create_window(screen_width / 2, screen_height / 2 + 80, window=btn_menu)
+        self.canvas.create_window(screen_width / 2, screen_height / 2 + 140, window=btn_quit)
 
-            self.move_pipes()
-
-        self.canvas.after(30, self.update_game)
-
-    # --- Commandes ---
-    def flap(self):
-        if not self.paused:
-            self.velocity = self.flap_strength
-
+    # ---------------- INPUT ----------------
     def on_space_press(self, event):
-        self.flap()
-
-    def pause_game(self):
-        self.paused = True
-
-    def resume_game(self):
-        self.paused = False
-
-    def quit_to_home(self):
-        self.paused = False
-        self.start_page()
+        self.velocity = self.flap_strength
 
     def quit_game(self):
         self.root.destroy()
 
+    # ---------------- UTILS ----------------
     def clear(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
-
-# --- Lancement ---
+# ---------------- LANCEMENT ----------------
 if __name__ == "__main__":
     root = tk.Tk()
     app = FlappyGUI(root)

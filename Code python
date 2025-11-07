@@ -47,14 +47,22 @@ class FlappyGUI:
 
                     # Dispatcher les commandes
                     if line == "FLAP":
+                        # Pour le mode bouton ou ultrasons
                         self.root.after(0, self.on_space_press, None)
+
                     elif line.startswith("VAL:"):
+                        # Valeur analogique pour infrarouge ou ultrasons
                         try:
                             val = int(line.split(":")[1])
-                            # Appelle la fonction infrared avec la valeur reçue
                             self.root.after(0, lambda v=val: self.infrared(v))
                         except ValueError:
                             pass
+
+                    elif line.startswith("ENCODER:"):
+                        # Donnée envoyée par Yacine : "ENCODER:LEFT" ou "ENCODER:RIGHT"
+                        direction = line.split(":")[1].strip().upper()
+                        self.root.after(0, lambda d=direction: self.handle_encoder(d))
+
 
                 except Exception as e:
                     print(f"Erreur lecture série : {e}")
@@ -95,7 +103,7 @@ class FlappyGUI:
 
         self.start_page()
 
-    # --- FONCTIONS MANQUANTES RÉINTÉGRÉES ---
+    # Menu
     def toggle_press_start_text(self):
         """Fait clignoter le texte 'Press Start'"""
         if hasattr(self, 'canvas') and self.canvas.winfo_exists() and hasattr(self, 'press_to_start_text'):
@@ -115,7 +123,8 @@ class FlappyGUI:
                 self.goku_hover_direction *= -1
             self.goku_hover_id = self.root.after(50, self.animate_goku_hover)
 
-    # --- FONCTION INFRAROUGE ---
+    #Modes
+    #Infrarouge
     def infrared(self, val):
         """Contrôle par capteur infrarouge : plus la main est proche, plus Goku monte"""
         if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
@@ -136,6 +145,22 @@ class FlappyGUI:
         coords = self.canvas.coords(self.bird)
         if coords:
             self.current_replay_data.append((elapsed, coords[1]))
+
+
+#encoder
+    def handle_encoder(self, data):
+        """Déplacement vertical avec encodeur"""
+        if not self.bird or not self.canvas.winfo_exists():
+            return
+        step = 30  # déplacement en pixels
+        if data == "LEFT":  # tourner à gauche → monter
+            self.bird_y = max(0, self.bird_y - step)
+        elif data == "RIGHT":  # tourner à droite → descendre
+            self.bird_y = min(self.screen_height - self.bird_size - 50, self.bird_y + step)
+        self.canvas.coords(self.bird, self.bird_x, self.bird_y)
+        
+#ultrasons
+#JOUER
 
     def start_page(self):
         self.clear()
@@ -348,7 +373,7 @@ class FlappyGUI:
 
         self.root.bind("<space>", self.on_space_press)
         self.game_loop_id = self.canvas.after(30, self.update_game)
-
+#OBSTACLES
     def create_pipe(self, x):
         gap = random.randint(180, 250)
         top_h = random.randint(100, self.screen_height - gap - 100)

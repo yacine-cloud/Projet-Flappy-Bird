@@ -50,13 +50,14 @@ class FlappyGUI:
                         # Pour le mode bouton ou ultrasons
                         self.root.after(0, self.on_space_press, None)
 
-                    elif line.startswith("VAL:"):
-                        # Valeur analogique pour infrarouge ou ultrasons
+                    elif line.startswith("ULTRA:"):
                         try:
-                            val = int(line.split(":")[1])
-                            self.root.after(0, lambda v=val: self.infrared(v))
+        # extraire seulement les chiffres
+                            val_cm = int(''.join(filter(str.isdigit, line.split(":")[1])))
+                            if self.current_mode == "ultrasound":
+                                self.root.after(0, lambda v=val_cm: self.ultrasound(v))
                         except ValueError:
-                            pass
+                                pass
 
                     elif line.startswith("ENCODER:"):
                         # Donnée envoyée par Yacine : "ENCODER:LEFT" ou "ENCODER:RIGHT"
@@ -551,6 +552,13 @@ class FlappyGUI:
         self.stop_serial_thread()
         for widget in self.root.winfo_children():
             widget.destroy()
+    
+    def ultrasound(self, val_cm):
+        if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
+            return
+
+        if val_cm < 20:  # seuil en cm
+            self.velocity = self.flap_strength  # <-- corrigé
     
     def send_gameover_to_pic(self):
         try:

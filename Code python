@@ -158,7 +158,7 @@ class FlappyGUI:
         elif data == "RIGHT":  # tourner à droite → descendre
             self.bird_y = min(self.screen_height - self.bird_size - 50, self.bird_y + step)
         self.canvas.coords(self.bird, self.bird_x, self.bird_y)
-        
+
 #ultrasons
 #JOUER
 
@@ -257,7 +257,7 @@ class FlappyGUI:
         self.canvas.pack(fill="both", expand=True)
 
         try:
-            bg_img = Image.open("fondregles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
+            bg_img = Image.open("regles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
             self.bg_regle_img = ImageTk.PhotoImage(bg_img)
             self.canvas.create_image(0, 0, anchor="nw", image=self.bg_regle_img)
         except FileNotFoundError:
@@ -402,6 +402,10 @@ class FlappyGUI:
             if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[
                 0] + 100 < bird_x:
                 self.score += 1
+                #buzzer
+                if self.ser and self.ser.is_open:
+                    self.ser.write(b"BUZZ:POINT\n")
+
                 self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
                 self.passed_dict[top] = True
 
@@ -481,6 +485,10 @@ class FlappyGUI:
             self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def end_game(self):
+        #buzzer
+        if self.ser and self.ser.is_open:
+            self.ser.write(b"BUZZ:GAMEOVER\n")
+
         if self.game_loop_id: self.canvas.after_cancel(self.game_loop_id)
 
         if not self.is_replay:

@@ -505,6 +505,7 @@ class FlappyGUI:
         
         # Envoi du score final au PIC
         self.send_score_to_pic()
+        self.send_gameover_to_pic()
 
         self.clear()
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
@@ -550,6 +551,15 @@ class FlappyGUI:
         self.stop_serial_thread()
         for widget in self.root.winfo_children():
             widget.destroy()
+    
+    def send_gameover_to_pic(self):
+        try:
+            if hasattr(self, 'ser') and self.ser and self.ser.is_open:
+                message = "BUF:GAMEOVER=1\n"
+                self.ser.write(message.encode())
+                print(f"[DEBUG] Game Over envoyé au PIC : {message.strip()}")
+        except Exception as e:
+                print(f"Erreur envoi Game Over au PIC : {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()

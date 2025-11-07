@@ -1,0 +1,135 @@
+#include <xc.h>
+#include "sysconfig.h"
+#include "usb_cdc_lib.h"
+#include "main.h"
+
+// --- Config PIC ---
+#pragma config FOSC = HSPLL_HS
+#pragma config PLLDIV = 2
+#pragma config CPUDIV = OSC1_PLL2
+#pragma config USBDIV = 2
+#pragma config WDT = OFF, LVP = OFF, MCLRE = ON
+
+#define LED_FLAP LATCbits.LATC0
+#define SEG_PORT LATD
+#define DIGIT0 LATAbits.LATA0  // DIS0 (dizaines)
+#define DIGIT1 LATAbits.LATA1  // DIS1 (unités)
+
+// --- Prototypes ---
+void sendFlap(void);
+unsigned char readButtonE0Asm(void);
+void checkUSBReceive(void);
+void updateDisplay(void);
+void setScore(unsigned char s);
+void resetScore(void);
+
+// --- Variables ---
+volatile unsigned char result;
+unsigned char score = 0;
+unsigned char display_digits[2];
+char usb_buffer[64];
+
+const unsigned char SEGMENTS[10] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
+
+// --- Initialisation ---
+void main(void) {
+    TRISC = 0x00; LATC = 0x00;
+    TRISD = 0x00; LATD = 0x00;
+    TRISA = 0x00; LATA = 0x00;
+    TRISEbits.TRISE0 = 1;
+
+    ADCON1 = 0x0F;
+    CMCON = 0x07;
+
+    initUSBLib();
+
+    unsigned char last_btn_state = 1;
+
+    resetScore();  // Score à 0 au démarrage
+
+    while(1) {
+        USBDeviceTasks();
+
+        if(isUSBReady()) {
+            unsigned char btn_state = readButtonE0Asm();
+
+            if(btn_state == 0 && last_btn_state == 1) { LED_FLAP = 1; sendFlap(); }
+            if(btn_state == 1 && last_btn_state == 0) { LED_FLAP = 0; sendFlap(); }
+            last_btn_state = btn_state;
+
+            checkUSBReceive();
+        }
+
+        updateDisplay();
+    }
+}
+
+// --- Lecture USB ---
+void checkUSBReceive(void) {
+    if(USBUSARTIsTxTrfReady()) {
+        uint8_t len = getsUSBUSART((uint8_t*)usb_buffer, sizeof(usb_buffer));
+        if(len > 0) {
+            for(uint8_t i = 0; i < len; i++) {
+                if(usb_buffer[i] == '1') {
+                    if(score < 99) score++;
+                    else score = 0;
+                    setScore(score);
+                }
+                else if(usb_buffer[i] == 'R') { // Reset score
+                    resetScore();
+                }
+            }
+        }
+        CDCTxService();
+    }
+}
+
+// --- Mise à jour score pour affichage ---
+void setScore(unsigned char s) {
+    score = s;
+    display_digits[0] = score / 10;  // dizaines
+    display_digits[1] = score % 10;  // unités
+}
+
+// --- Multiplexage 7 segments ---
+void updateDisplay(void) {
+    static unsigned char toggle = 0;
+
+    if(toggle == 0) {
+        DIGIT0 = 0;                   // éteint l'autre digit
+        SEG_PORT = SEGMENTS[display_digits[0]]; // dizaine
+        DIGIT1 = 1;                   // unité activée
+    } else {
+        DIGIT1 = 0;
+        SEG_PORT = SEGMENTS[display_digits[1]]; // unité
+        DIGIT0 = 1;                   // dizaine activée
+    }
+
+    toggle = !toggle;
+    for(volatile int i=0;i<500;i++); // pause multiplexage
+}
+
+void resetScore(void) {
+    score = 0;
+    display_digits[0] = 0;
+    display_digits[1] = 0;
+}
+
+// --- Envoi USB FLAP ---
+void sendFlap(void) {
+    char msg[] = "FLAP\r\n";
+    putUSBUSART((uint8_t*)msg, sizeof(msg)-1);
+    CDCTxService();
+}
+
+// --- Lecture bouton RE0 en ASM ---
+unsigned char readButtonE0Asm(void) {
+    result = 1;
+    asm("btfss PORTE, 0\n clrf _result\n");
+    return result;
+}
+
+// --- Interruption USB ---
+void __interrupt() mainISR(void) {
+    processUSBTasks();
+}

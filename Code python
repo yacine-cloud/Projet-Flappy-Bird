@@ -269,7 +269,7 @@ class FlappyGUI:
         self.canvas.pack(fill="both", expand=True)
 
         try:
-            bg_img = Image.open("fondregles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
+            bg_img = Image.open("regles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
             self.bg_regle_img = ImageTk.PhotoImage(bg_img)
             self.canvas.create_image(0, 0, anchor="nw", image=self.bg_regle_img)
         except FileNotFoundError:

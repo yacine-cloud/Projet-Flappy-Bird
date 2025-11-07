@@ -12,7 +12,7 @@ class FlappyGUI:
     def init_serial_thread(self):
         """Initialise le port série"""
         try:
-            self.ser = serial.Serial('COM4', 9600, timeout=0.1)
+            self.ser = serial.Serial('COM13', 9600, timeout=0.1)
         except serial.SerialException:
             print("Erreur : impossible d'ouvrir le port série COM4")
             return
@@ -69,6 +69,18 @@ class FlappyGUI:
                     break
             else:
                 threading.Event().wait(0.01)
+    
+        # --- ENVOI DU SCORE AU PIC ---
+    def send_score_to_pic(self):
+        """Envoie le score actuel au PIC pour affichage sur 7 segments"""
+        try:
+            if hasattr(self, 'ser') and self.ser and self.ser.is_open:
+                message = f"BUF:SCORE={self.score:02d}\n"
+                self.ser.write(message.encode())
+                print(f"[DEBUG] Score envoyé au PIC : {message.strip()}")
+        except Exception as e:
+            print(f"Erreur envoi score au PIC : {e}")
+
 
     # INITIALISATION
     def __init__(self, root):
@@ -158,7 +170,7 @@ class FlappyGUI:
         elif data == "RIGHT":  # tourner à droite → descendre
             self.bird_y = min(self.screen_height - self.bird_size - 50, self.bird_y + step)
         self.canvas.coords(self.bird, self.bird_x, self.bird_y)
-
+        
 #ultrasons
 #JOUER
 
@@ -257,7 +269,7 @@ class FlappyGUI:
         self.canvas.pack(fill="both", expand=True)
 
         try:
-            bg_img = Image.open("regles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
+            bg_img = Image.open("fondregles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
             self.bg_regle_img = ImageTk.PhotoImage(bg_img)
             self.canvas.create_image(0, 0, anchor="nw", image=self.bg_regle_img)
         except FileNotFoundError:
@@ -399,15 +411,12 @@ class FlappyGUI:
             self.canvas.move(bot, -speed, 0)
 
             # Mise à jour du score
-            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[
-                0] + 100 < bird_x:
+            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[0] + 100 < bird_x:
                 self.score += 1
-                #buzzer
-                if self.ser and self.ser.is_open:
-                    self.ser.write(b"BUZZ:POINT\n")
-
                 self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
                 self.passed_dict[top] = True
+                self.send_score_to_pic()  # ➜ Envoi au PIC à chaque point gagné
+
 
         # Suppression et création des nouveaux tuyaux
         if self.pipes and self.canvas.coords(self.pipes[0][0]) and self.canvas.coords(self.pipes[0][0])[0] < -100:
@@ -485,10 +494,6 @@ class FlappyGUI:
             self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def end_game(self):
-        #buzzer
-        if self.ser and self.ser.is_open:
-            self.ser.write(b"BUZZ:GAMEOVER\n")
-
         if self.game_loop_id: self.canvas.after_cancel(self.game_loop_id)
 
         if not self.is_replay:
@@ -497,6 +502,9 @@ class FlappyGUI:
 
         if self.current_mode and self.score > self.best_scores[self.current_mode]:
             self.best_scores[self.current_mode] = self.score
+        
+        # Envoi du score final au PIC
+        self.send_score_to_pic()
 
         self.clear()
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
@@ -542,7 +550,6 @@ class FlappyGUI:
         self.stop_serial_thread()
         for widget in self.root.winfo_children():
             widget.destroy()
-
 
 if __name__ == "__main__":
     root = tk.Tk()

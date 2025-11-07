@@ -2,6 +2,7 @@ import threading
 import serial
 import tkinter as tk
 import random
+import time
 from PIL import Image, ImageTk, Image
 
 
@@ -9,54 +10,57 @@ class FlappyGUI:
 
     # COMMUNICATION
     def init_serial_thread(self):
-        """Initialise le port série, dit au PIC quel mode est joué, et démarre le thread"""
+        """Initialise le port série"""
         try:
-            self.ser = serial.Serial('COM13', 9600, timeout=0.1)
+            self.ser = serial.Serial('COM4', 9600, timeout=0.1)
         except serial.SerialException:
-            print("Erreur : impossible d'ouvrir le port série COM13")
+            print("Erreur : impossible d'ouvrir le port série COM4")
             return
 
         if self.current_mode:
+            # Envoie le mode choisi au PIC
             command_to_send = f"MODE:{self.current_mode.upper()}\n"
             self.ser.write(command_to_send.encode())
             print(f"Envoyé au PIC : {command_to_send.strip()}")
 
-        # Crée et démarre un thread série "stoppable"
         self.serial_thread_stop = threading.Event()
         self.serial_thread = threading.Thread(target=self.read_pic, daemon=True)
         self.serial_thread.start()
 
     def stop_serial_thread(self):
-        """Arrête proprement le thread série et ferme le port"""
-        # Signale au thread de s'arrêter
         if hasattr(self, 'serial_thread_stop') and self.serial_thread_stop:
             self.serial_thread_stop.set()
-
-        # Attend que le thread se termine
         if hasattr(self, 'serial_thread') and self.serial_thread and self.serial_thread.is_alive():
             self.serial_thread.join(timeout=0.1)
-
-        # Ferme le port série
         if hasattr(self, 'ser') and self.ser and self.ser.is_open:
             self.ser.close()
             print("Port série fermé.")
 
     def read_pic(self):
-        """Boucle pour lire les commandes du PIC (qui peut s'arrêter)"""
-        while not self.serial_thread_stop.is_set():  # S'arrête si le flag est mis
+        """Boucle de lecture des commandes PIC"""
+        while not self.serial_thread_stop.is_set():
             if hasattr(self, 'ser') and self.ser and self.ser.in_waiting:
                 try:
-                    data = self.ser.readline().decode().strip()
-                    if data == "FLAP":
+                    line = self.ser.readline().decode().strip()
+                    if not line:
+                        continue
+
+                    # Dispatcher les commandes
+                    if line == "FLAP":
                         self.root.after(0, self.on_space_press, None)
-                except serial.SerialException:
-                    print("Erreur port série (fermeture normale).")
-                    break  # Sort de la boucle
+                    elif line.startswith("VAL:"):
+                        try:
+                            val = int(line.split(":")[1])
+                            # Appelle la fonction infrared avec la valeur reçue
+                            self.root.after(0, lambda v=val: self.infrared(v))
+                        except ValueError:
+                            pass
+
                 except Exception as e:
                     print(f"Erreur lecture série : {e}")
+                    break
             else:
-                threading.Event().wait(0.01)  # Petite pause
-        print("Thread de lecture série arrêté.")
+                threading.Event().wait(0.01)
 
     # INITIALISATION
     def __init__(self, root):
@@ -66,307 +70,248 @@ class FlappyGUI:
         self.root.bind("<Escape>", lambda e: self.root.destroy())
 
         self.best_scores = {
-            "push_button": 0,
-            "encoder": 0,
-            "ultrasound": 0,
-            "infrared": 0
+            "push_button": 0, "encoder": 0, "ultrasound": 0, "infrared": 0
         }
         self.current_mode = None
 
         self.blink_after_id = None
         self.game_loop_id = None
         self.goku_hover_id = None
-
         self.db_loop_id = None
 
-        # Variables pour le port série
+        # Variables de jeu
+        self.is_paused = False
+        self.is_replay = False
+        self.game_start_time = 0
+        self.current_replay_data = []
+        self.last_replay_data = []
+        self.replay_index = 0
+
+        self.smooth_y = None
+
         self.ser = None
         self.serial_thread = None
         self.serial_thread_stop = None
 
         self.start_page()
 
+    # --- FONCTIONS MANQUANTES RÉINTÉGRÉES ---
     def toggle_press_start_text(self):
-        """Fait clignoter le texte "Press Start" (TS105)"""
+        """Fait clignoter le texte 'Press Start'"""
         if hasattr(self, 'canvas') and self.canvas.winfo_exists() and hasattr(self, 'press_to_start_text'):
             if self.press_start_visible:
                 self.canvas.itemconfig(self.press_to_start_text, state='hidden')
             else:
                 self.canvas.itemconfig(self.press_to_start_text, state='normal')
             self.press_start_visible = not self.press_start_visible
-
             self.blink_after_id = self.root.after(500, self.toggle_press_start_text)
 
     def animate_goku_hover(self):
-        """Fait "flotter" le Goku sur le menu"""
+        """Animation de Goku sur le menu"""
         if hasattr(self, 'goku_hover_sprite') and self.canvas.winfo_exists():
             self.goku_hover_step += self.goku_hover_direction
             self.canvas.move(self.goku_hover_sprite, 0, self.goku_hover_direction * 2)
-
-            if self.goku_hover_step > 10 or self.goku_hover_step < -10:
+            if abs(self.goku_hover_step) > 10:
                 self.goku_hover_direction *= -1
-
             self.goku_hover_id = self.root.after(50, self.animate_goku_hover)
+
+    # --- FONCTION INFRAROUGE ---
+    def infrared(self, val):
+        """Contrôle par capteur infrarouge : plus la main est proche, plus Goku monte"""
+        if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
+            return
+
+        val_min = 70
+        val_max = 400
+        val = max(min(val, val_max), val_min)
+
+        # Calcul de la "force de flap" selon la distance
+        ratio = 1 - (val - val_min) / (val_max - val_min)
+        flap_power = (ratio - 0.5) * 30  # varie entre -15 et +15
+
+        # Appliquer une impulsion verticale (comme un flap doux)
+        self.velocity = -flap_power
+
+        elapsed = time.time() - self.game_start_time
+        coords = self.canvas.coords(self.bird)
+        if coords:
+            self.current_replay_data.append((elapsed, coords[1]))
 
     def start_page(self):
         self.clear()
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
 
-        bg_img = Image.open("fond.png").resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+        bg_img = Image.open("fond.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
         self.bg_start_img = ImageTk.PhotoImage(bg_img)
         self.canvas.create_image(0, 0, anchor="nw", image=self.bg_start_img)
 
         overlay = Image.new("RGBA", (500, 450), (20, 30, 70, 180))
         self.overlay_img = ImageTk.PhotoImage(overlay)
-        self.canvas.create_image(screen_width / 2, screen_height / 2, image=self.overlay_img, anchor="center")
+        self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_img, anchor="center")
 
-        self.canvas.create_text(screen_width / 2, screen_height / 2 - 170, text="Flappy Goku",
-                                font=("Arial", 40, "bold"), fill="white")
-
-        self.press_to_start_text = self.canvas.create_text(
-            screen_width / 2, screen_height / 2 - 100,
-            text="Press Start",
-            font=("Arial", 22, "bold"),
-            fill="#FFD700"
-        )
+        self.canvas.create_text(screen_w / 2, screen_h / 2 - 170, text="Flappy Goku", font=("Arial", 40, "bold"),
+                                fill="white")
+        self.press_to_start_text = self.canvas.create_text(screen_w / 2, screen_h / 2 - 100, text="Press Start",
+                                                           font=("Arial", 22, "bold"), fill="#FFD700")
         self.press_start_visible = True
         self.toggle_press_start_text()
 
         img = Image.open("goku2.png").resize((150, 150), Image.Resampling.LANCZOS)
         self.goku_hover_img = ImageTk.PhotoImage(img)
-
-        goku_x = screen_width // 2 - 400
-        goku_y = screen_height // 2
-        self.goku_hover_sprite = self.canvas.create_image(goku_x, goku_y, image=self.goku_hover_img)
-
+        self.goku_hover_sprite = self.canvas.create_image(screen_w // 2 - 400, screen_h // 2, image=self.goku_hover_img)
         self.goku_hover_step = 0
         self.goku_hover_direction = 1
         self.animate_goku_hover()
 
-        btn_font_normal = ("Arial", 16, "bold")
-        btn_font_hover = ("Arial", 18, "bold")
-
-        btn_style = {
-            "font": btn_font_normal,
-            "relief": "flat",
-            "padx": 15,
-            "pady": 5,
-            "width": 12,
-        }
-
-        btn_play = tk.Button(self.root, text="Play",
-                             **btn_style,
-                             fg="black",
-                             bg="#FFD700",
-                             activebackground="#FFFF99",
+        btn_style = {"font": ("Arial", 16, "bold"), "relief": "flat", "padx": 15, "pady": 5, "width": 12}
+        btn_play = tk.Button(self.root, text="Play", **btn_style, bg="#FFD700", fg="black", activebackground="#FFFF99",
                              command=self.select_mode_page)
+        btn_inst = tk.Button(self.root, text="Instructions", **btn_style, bg="#FFA500", fg="black",
+                             activebackground="#FFC966", command=self.regle)
+        btn_replay = tk.Button(self.root, text="Replay", **btn_style, bg="#4CAF50", fg="white",
+                               activebackground="#8BC34A", command=self.replay_game_page)
+        btn_quit = tk.Button(self.root, text="Quitter", **btn_style, bg="#FF4C4C", fg="white",
+                             activebackground="#FF8888", command=self.quit_game)
 
-        btn_instructions = tk.Button(self.root, text="Instructions",
-                                     **btn_style,
-                                     fg="black",
-                                     bg="#FFA500",
-                                     activebackground="#FFC966",
-                                     command=self.regle)
+        self.canvas.create_window(screen_w / 2, screen_h / 2 - 30, window=btn_play)
+        self.canvas.create_window(screen_w / 2, screen_h / 2 + 30, window=btn_inst)
+        self.canvas.create_window(screen_w / 2, screen_h / 2 + 90, window=btn_replay)
+        self.canvas.create_window(screen_w / 2, screen_h / 2 + 150, window=btn_quit)
 
-        btn_replay = tk.Button(self.root, text="Replay",
-                               **btn_style,
-                               fg="white",
-                               bg="#4CAF50",
-                               activebackground="#8BC34A",
-                               command=self.replay_game_page)
-
-        btn_quit = tk.Button(self.root, text="Quitter",
-                             **btn_style,
-                             bg="#FF4C4C",
-                             fg="white",
-                             activebackground="#FF8888",
-                             command=self.quit_game)
-
-        self.canvas.create_window(screen_width / 2, screen_height / 2 - 30, window=btn_play)
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 30, window=btn_instructions)
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 90, window=btn_replay)
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 150, window=btn_quit)
-
-        buttons = [btn_play, btn_instructions, btn_replay, btn_quit]
-        for btn in buttons:
-            btn.bind("<Enter>", lambda e, b=btn, f=btn_font_hover: b.config(font=f))
-            btn.bind("<Leave>", lambda e, b=btn, f=btn_font_normal: b.config(font=f))
+        for btn in [btn_play, btn_inst, btn_replay, btn_quit]:
+            btn.bind("<Enter>", lambda e, b=btn: b.config(font=("Arial", 18, "bold")))
+            btn.bind("<Leave>", lambda e, b=btn: b.config(font=("Arial", 16, "bold")))
 
     def select_mode_page(self):
-        """Page pour sélectionner le mode de jeu (TS107)"""
         self.clear()
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
-
         bg_img = Image.open("fond.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
         self.bg_select_img = ImageTk.PhotoImage(bg_img)
-        self.canvas = tk.Canvas(self.root, width=screen_w, height=screen_h, highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         self.canvas.create_image(0, 0, anchor="nw", image=self.bg_select_img)
 
         overlay = Image.new("RGBA", (600, 550), (20, 30, 70, 180))
         self.overlay_select_img = ImageTk.PhotoImage(overlay)
         self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_select_img, anchor="center")
-
         self.canvas.create_text(screen_w // 2, screen_h // 2 - 200, text="Sélection du Mode",
                                 font=("Arial", 32, "bold"), fill="white")
 
-        btn_font_normal = ("Arial", 16, "bold")
-        btn_font_hover = ("Arial", 18, "bold")
-        btn_style = {
-            "font": btn_font_normal,
-            "relief": "flat",
-            "padx": 15,
-            "pady": 5,
-            "width": 18,
-        }
+        btn_style = {"font": ("Arial", 16, "bold"), "relief": "flat", "padx": 15, "pady": 5, "width": 18}
 
-        btn_push_button = tk.Button(self.root, text="Push Button",
-                                    **btn_style, fg="white", bg="#3C00FF", activebackground="#6040FF",
-                                    command=lambda: self.start_game("push_button"))
+        btn1 = tk.Button(self.root, text="Push Button", **btn_style, bg="#3C00FF", fg="white",
+                         activebackground="#6040FF", command=lambda: self.start_game("push_button"))
+        btn2 = tk.Button(self.root, text="Digital Encoder", **btn_style, bg="#4CAF50", fg="white",
+                         activebackground="#8BC34A", command=lambda: self.start_game("encoder"))
+        btn3 = tk.Button(self.root, text="Ultrasound Sensor", **btn_style, bg="#FFA500", fg="black",
+                         activebackground="#FFC966", command=lambda: self.start_game("ultrasound"))
+        btn4 = tk.Button(self.root, text="Infrared Sensor", **btn_style, bg="#FFD700", fg="black",
+                         activebackground="#FFFF99", command=lambda: self.start_game("infrared"))
+        btn5 = tk.Button(self.root, text="Retour", **btn_style, bg="#FF4C4C", fg="white", activebackground="#FF8888",
+                         command=self.start_page)
 
-        btn_encoder = tk.Button(self.root, text="Digital Encoder",
-                                **btn_style, fg="white", bg="#4CAF50", activebackground="#8BC34A",
-                                command=lambda: self.start_game("encoder"))
+        self.canvas.create_window(screen_w // 2, screen_h // 2 - 100, window=btn1)
+        self.canvas.create_window(screen_w // 2, screen_h // 2 - 40, window=btn2)
+        self.canvas.create_window(screen_w // 2, screen_h // 2 + 20, window=btn3)
+        self.canvas.create_window(screen_w // 2, screen_h // 2 + 80, window=btn4)
+        self.canvas.create_window(screen_w // 2, screen_h // 2 + 180, window=btn5)
 
-        btn_ultrasound = tk.Button(self.root, text="Ultrasound Sensor",
-                                   **btn_style, fg="black", bg="#FFA500", activebackground="#FFC966",
-                                   command=lambda: self.start_game("ultrasound"))
+        for btn in [btn1, btn2, btn3, btn4, btn5]:
+            btn.bind("<Enter>", lambda e, b=btn: b.config(font=("Arial", 18, "bold")))
+            btn.bind("<Leave>", lambda e, b=btn: b.config(font=("Arial", 16, "bold")))
 
-        btn_infrared = tk.Button(self.root, text="Infrared Sensor",
-                                 **btn_style, fg="black", bg="#FFD700", activebackground="#FFFF99",
-                                 command=lambda: self.start_game("infrared"))
-
-        btn_retour = tk.Button(self.root, text="Retour",
-                               **btn_style, fg="white", bg="#FF4C4C", activebackground="#FF8888",
-                               command=self.start_page)
-
-        self.canvas.create_window(screen_w // 2, screen_h // 2 - 100, window=btn_push_button)
-        self.canvas.create_window(screen_w // 2, screen_h // 2 - 40, window=btn_encoder)
-        self.canvas.create_window(screen_w // 2, screen_h // 2 + 20, window=btn_ultrasound)
-        self.canvas.create_window(screen_w // 2, screen_h // 2 + 80, window=btn_infrared)
-        self.canvas.create_window(screen_w // 2, screen_h // 2 + 180, window=btn_retour)
-
-        buttons = [btn_push_button, btn_encoder, btn_ultrasound, btn_infrared, btn_retour]
-        for btn in buttons:
-            btn.bind("<Enter>", lambda e, b=btn, f=btn_font_hover: b.config(font=f))
-            btn.bind("<Leave>", lambda e, b=btn, f=btn_font_normal: b.config(font=f))
-
-    def replay_game_page(self):
-        """Page pour voir le replay du dernier jeu (TS114)"""
-        self.clear()
-        screen_w = self.root.winfo_screenwidth()
-        screen_h = self.root.winfo_screenheight()
-
-        self.canvas = tk.Canvas(self.root, width=screen_w, height=screen_h, bg="#555", highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
-
-        self.canvas.create_text(screen_w // 2, 100, text="Mode Replay", font=("Arial", 32, "bold"), fill="white")
-
-        self.canvas.create_text(screen_w // 2, screen_h // 2, text="À implémenter...\n(TS114)", font=("Arial", 20),
-                                fill="white")
-
-        btn_retour = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"), bg="#FFD700", fg="black",
-                               command=self.start_page)
-        self.canvas.create_window(screen_w // 2, screen_h - 100, window=btn_retour)
-
-    # --- PAGE REGLE MISE À JOUR (Polices et Overlay Corrigés) ---
     def regle(self):
         self.clear()
         screen_w = self.root.winfo_screenwidth()
         screen_h = self.root.winfo_screenheight()
-
-        self.canvas = tk.Canvas(self.root, width=screen_w, height=screen_h, highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
 
-        # --- 1. FOND DBZ (avec Shenron figé et cadre) ---
         try:
-            bg_img = Image.open("fondregles2.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
+            bg_img = Image.open("fondregles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
             self.bg_regle_img = ImageTk.PhotoImage(bg_img)
             self.canvas.create_image(0, 0, anchor="nw", image=self.bg_regle_img)
         except FileNotFoundError:
-            print("Erreur: 'fondregles.png' non trouvé. Fond bleu par défaut.")
             self.canvas.config(bg="#2196F3")
-            self.canvas.create_text(screen_w // 2, screen_h // 2, text="Erreur: fondregles.png introuvable",
-                                    font=("Arial", 20, "bold"), fill="red")
-            btn_retour_err = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"),
-                                       bg="#FFD700", fg="black", command=self.start_page)
-            self.canvas.create_window(screen_w // 2, screen_h - 100, window=btn_retour_err)
-            return
 
-        # --- 2. OVERLAY (Taille Corrigée) ---
-        # L'overlay est ajusté pour mieux correspondre au cadre
-        overlay_w = int(screen_w * 0.6)  # Plus large
-        overlay_h = int(screen_h * 0.55)  # Plus haut
-        overlay = Image.new("RGBA", (overlay_w, overlay_h),
-                            (0, 0, 0, 170))  # Noir semi-transparent (un peu plus sombre)
+        overlay = Image.new("RGBA", (int(screen_w * 0.55), int(screen_h * 0.5)), (0, 0, 0, 160))
         self.overlay_regle_img = ImageTk.PhotoImage(overlay)
-
-        # Positionné au centre
         self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_regle_img, anchor="center")
 
-        # --- 3. TEXTE (Polices et Positions Corrigées) ---
+        self.canvas.create_text(screen_w / 2, screen_h * 0.28, text="Comment Jouer", font=("Arial", 32, "bold"),
+                                fill="#FFD700")
+        self.canvas.create_text(screen_w / 2, screen_h * 0.36,
+                                text="Le but du jeu est simple :\nFais voler Goku sans qu’il touche les Kamehameha !",
+                                font=("Arial", 16, "italic"), fill="white", justify="center")
+        self.canvas.create_text(screen_w / 2, screen_h * 0.5,
+                                text="• Push Button : Appuie sur le bouton pour voler.\n• Digital Encoder : Tourne l'encodeur pour voler.\n• Ultrasound Sensor : Passe ta main au-dessus.\n• Infrared Sensor : Passe ta main devant.",
+                                font=("Arial", 18), fill="white", justify="left")
+        self.canvas.create_text(screen_w / 2, screen_h * 0.64,
+                                text="Si tu touches le sol ou un Kamehameha, c’est perdu !",
+                                font=("Arial", 16, "italic"), fill="white", justify="center")
 
-        # TITRE (positionné en haut de l'overlay)
-        y_titre = int(screen_h * 0.28)
-        self.canvas.create_text(screen_w // 2, y_titre, text="Comment Jouer",
-                                font=("Arial", 32, "bold"), fill="#FFD700")
+        btn_retour = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"), bg="#FFD700", fg="black",
+                               relief="flat", activebackground="#FFFF99", command=self.start_page)
+        self.canvas.create_window(screen_w / 2, screen_h * 0.73, window=btn_retour)
 
-        # PARTIE 1: Intro (police réduite)
-        intro = ("Le but du jeu est simple :\n"
-                 "Fais voler Goku sans qu’il touche les Kamehameha !")
-        y_intro = int(screen_h * 0.36)
-        self.canvas.create_text(screen_w // 2, y_intro, text=intro,
-                                font=("Arial", 16, "italic"), fill="white",  # Police 20 -> 16
-                                justify="center", width=int(screen_w * 0.55))
+    def replay_game_page(self):
+        if not self.last_replay_data:
+            self.start_page()
+            return
 
-        # PARTIE 2: Liste à puces (police réduite)
-        regles = (
-            "•  Push Button : Appuie sur le bouton pour voler.\n\n"
-            "•  Digital Encoder : Tourne l'encodeur pour voler.\n\n"
-            "•  Ultrasound Sensor : Passe ta main au-dessus du capteur.\n\n"
-            "•  Infrared Sensor : Passe ta main devant le capteur."
-        )
-        y_regles = int(screen_h * 0.5)  # Centré
-        self.canvas.create_text(screen_w // 2, y_regles, text=regles, font=("Arial", 18), fill="white",
-                                # Police 20 -> 18
-                                justify="left", width=int(screen_w * 0.5))
+        self.clear()
+        self.is_replay = True
+        self.is_paused = False
+        self.replay_index = 0
+        self.game_start_time = time.time()
 
-        # PARTIE 3: Outro (police réduite)
-        outro = "Si tu touches le sol ou un Kamehameha, c’est perdu !"
-        y_outro = int(screen_h * 0.64)  # Remonté
-        self.canvas.create_text(screen_w // 2, y_outro, text=outro,
-                                font=("Arial", 16, "italic"), fill="white",  # Police 20 -> 16
-                                justify="center", width=int(screen_w * 0.5))
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        self.screen_width = self.root.winfo_screenwidth()
+        self.screen_height = self.root.winfo_screenheight()
+        bg_img = Image.open("fond.png").resize((self.screen_width, self.screen_height), Image.Resampling.LANCZOS)
+        self.bg_img = ImageTk.PhotoImage(bg_img)
+        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_img)
+        self.ground = self.canvas.create_rectangle(0, self.screen_height - 50, self.screen_width, self.screen_height,
+                                                   fill="#DEB887", outline="")
+        self.bird_size = 100
+        self.bird_x = 200
+        # Position de départ pour le replay
+        start_y = self.last_replay_data[0][1] if self.last_replay_data else self.screen_height // 2
+        self.bird_img = ImageTk.PhotoImage(
+            Image.open("goku2.png").resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS))
+        self.bird = self.canvas.create_image(self.bird_x, start_y, anchor="nw", image=self.bird_img)
 
-        # --- 4. BOUTON (Position corrigée) ---
-        btn_font = ("Arial", 16, "bold")
-        btn_retour = tk.Button(self.root, text="Retour au menu",
-                               font=btn_font,
-                               bg="#FFD700", fg="black",
-                               relief="flat", padx=15, pady=5, width=15,
-                               activebackground="#FFFF99",
-                               command=self.start_page)
+        self.pipes = []
+        self.pipe_images = []
+        x = self.bird_x + 500
+        for i in range(5):
+            self.create_pipe(x)
+            x += random.randint(250, 400)
 
-        # Positionné en bas de l'overlay
-        y_bouton = int(screen_h * 0.73)
-        self.canvas.create_window(screen_w // 2, y_bouton, window=btn_retour)
+        self.passed_dict = {pipe[0]: True for pipe in self.pipes}
+        self.canvas.create_text(self.screen_width / 2, 50, text="REPLAY X2", font=("Arial", 30, "bold"), fill="red")
+
+        self.game_loop_id = self.canvas.after(15, self.update_game)
 
     def start_game(self, mode):
-        """Lance le jeu principal pour un mode donné"""
-        print(f"Lancement du jeu en mode : {mode}")
         self.current_mode = mode
-
         self.game_page()
         self.init_serial_thread()
 
     def game_page(self):
-        self.clear()  # S'assure que tout est propre avant de commencer
-        self.canvas = tk.Canvas(self.root, width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight(),
-                                highlightthickness=0)
+        self.clear()
+        self.is_paused = False
+        self.is_replay = False
+        self.current_replay_data = []
+        self.game_start_time = time.time()
+        self.smooth_y = None
+
+        self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         self.screen_width = self.root.winfo_screenwidth()
         self.screen_height = self.root.winfo_screenheight()
@@ -387,19 +332,14 @@ class FlappyGUI:
 
         self.pipes = []
         self.pipe_images = []
-        pipe_count = 5
         x = self.bird_x + 500
-        self.min_distance = 250
-        self.max_distance = 400
-        for i in range(pipe_count):
+        for i in range(5):
             self.create_pipe(x)
-            x += random.randint(self.min_distance, self.max_distance)
+            x += random.randint(250, 400)
 
-        self.passed_dict = {}
-        for top, bottom in self.pipes:
-            self.passed_dict[top] = False
+        self.passed_dict = {pipe[0]: False for pipe in self.pipes}
         self.score = 0
-        self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: {self.score}",
+        self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: 0",
                                                   font=("Arial", 24, "bold"), fill="white", anchor="ne")
 
         self.velocity = 0
@@ -407,218 +347,166 @@ class FlappyGUI:
         self.flap_strength = -15
 
         self.root.bind("<space>", self.on_space_press)
-
         self.game_loop_id = self.canvas.after(30, self.update_game)
 
     def create_pipe(self, x):
         gap = random.randint(180, 250)
-        top_height = random.randint(100, self.screen_height - gap - 100)
-        bottom_y = top_height + gap
-        pipe_width = 100
-
-        img_top = Image.open("tuyau1.png").resize((pipe_width, top_height), Image.Resampling.LANCZOS)
-        img_bottom = Image.open("tuyau2.png").resize((pipe_width, self.screen_height - bottom_y),
-                                                     Image.Resampling.LANCZOS)
-
-        top_tk = ImageTk.PhotoImage(img_top)
-        bottom_tk = ImageTk.PhotoImage(img_bottom)
-
-        top = self.canvas.create_image(x, 0, anchor="nw", image=top_tk)
-        bottom = self.canvas.create_image(x, bottom_y, anchor="nw", image=bottom_tk)
-
-        self.pipes.append((top, bottom))
-        self.pipe_images.extend([top_tk, bottom_tk])
+        top_h = random.randint(100, self.screen_height - gap - 100)
+        bottom_y = top_h + gap
+        img_top = ImageTk.PhotoImage(Image.open("tuyau1.png").resize((100, top_h), Image.Resampling.LANCZOS))
+        img_bot = ImageTk.PhotoImage(
+            Image.open("tuyau2.png").resize((100, self.screen_height - bottom_y), Image.Resampling.LANCZOS))
+        top = self.canvas.create_image(x, 0, anchor="nw", image=img_top)
+        bot = self.canvas.create_image(x, bottom_y, anchor="nw", image=img_bot)
+        self.pipes.append((top, bot))
+        self.pipe_images.extend([img_top, img_bot])
 
     def move_pipes(self):
-        speed = 8
-        bird_x = self.canvas.coords(self.bird)[0]
+        speed = 16 if self.is_replay else 8
+        bird_coords = self.canvas.coords(self.bird)
+        if not bird_coords:
+            return
+        bird_x = bird_coords[0]
 
-        for top, bottom in self.pipes:
+        # Déplacement + scoring
+        for top, bot in list(self.pipes):
             self.canvas.move(top, -speed, 0)
-            self.canvas.move(bottom, -speed, 0)
+            self.canvas.move(bot, -speed, 0)
 
-            tx1, ty1 = self.canvas.coords(top)
-            if not self.passed_dict[top] and tx1 + 100 < bird_x:
+            # Mise à jour du score
+            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[
+                0] + 100 < bird_x:
                 self.score += 1
                 self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
                 self.passed_dict[top] = True
 
-        rightmost_x = max(self.canvas.coords(p[0])[0] for p in self.pipes)
-        for top, bottom in self.pipes:
-            x1, y1 = self.canvas.coords(top)
-            if x1 + 100 < 0:
-                gap = random.randint(180, 250)
-                top_height = random.randint(100, self.screen_height - gap - 100)
-                bottom_y = top_height + gap
-                pipe_width = 100
+        # Suppression et création des nouveaux tuyaux
+        if self.pipes and self.canvas.coords(self.pipes[0][0]) and self.canvas.coords(self.pipes[0][0])[0] < -100:
+            try:
+                top, bot = self.pipes.pop(0)
+                self.canvas.delete(top)
+                self.canvas.delete(bot)
+            except Exception as e:
+                print("Erreur suppression tuyaux :", e)
+                return
 
-                img_top = Image.open("tuyau1.png").resize((pipe_width, top_height), Image.Resampling.LANCZOS)
-                img_bottom = Image.open("tuyau2.png").resize((pipe_width, self.screen_height - bottom_y),
-                                                             Image.Resampling.LANCZOS)
-
-                top_tk = ImageTk.PhotoImage(img_top)
-                bottom_tk = ImageTk.PhotoImage(img_bottom)
-
-                new_x = rightmost_x + random.randint(self.min_distance, self.max_distance)
-                self.canvas.coords(top, new_x, 0)
-                self.canvas.coords(bottom, new_x, bottom_y)
-                self.canvas.itemconfig(top, image=top_tk)
-                self.canvas.itemconfig(bottom, image=bottom_tk)
-
-                self.pipe_images.extend([top_tk, bottom_tk])
-                self.passed_dict[top] = False
-                rightmost_x = new_x
+            # Vérifie qu'il reste bien au moins un tuyau avant de calculer le nouveau X
+            if self.pipes and self.canvas.coords(self.pipes[-1][0]):
+                last_x = self.canvas.coords(self.pipes[-1][0])[0]
+                new_x = last_x + random.randint(250, 400)
+                self.create_pipe(new_x)
+            else:
+                print("Aucun tuyau restant, recréation forcée...")
+                self.pipes = []
+                start_x = self.bird_x + 500
+                for i in range(5):
+                    self.create_pipe(start_x + i * 300)
 
     def check_collision(self):
-        bird_margin_x = 30
-        bird_margin_y = 30
-        bird_x1, bird_y1, bird_x2, bird_y2 = self.canvas.bbox(self.bird)
-        bird_x1 += bird_margin_x
-        bird_y1 += bird_margin_y
-        bird_x2 -= bird_margin_x
-        bird_y2 -= bird_margin_y
-
-        if bird_y1 <= 0 or bird_y2 >= self.screen_height - 50:
-            return True
-
-        pipe_margin_x = 20
-        pipe_margin_y = 20
-
-        for top, bottom in self.pipes:
+        bx1, by1, bx2, by2 = self.canvas.bbox(self.bird)
+        if by1 <= 0 or by2 >= self.screen_height - 50: return True
+        for top, bot in self.pipes:
             tx1, ty1, tx2, ty2 = self.canvas.bbox(top)
-            tx1 += pipe_margin_x
-            ty1 += pipe_margin_y
-            tx2 -= pipe_margin_x
-            ty2 -= pipe_margin_y
-
-            bx1, by1, bx2, by2 = self.canvas.bbox(bottom)
-            bx1 += pipe_margin_x
-            by1 += pipe_margin_y
-            bx2 -= pipe_margin_x
-            by2 -= pipe_margin_y
-
-            if bird_x2 > tx1 and bird_x1 < tx2 and bird_y1 < ty2:
+            bx1_p, by1_p, bx2_p, by2_p = self.canvas.bbox(bot)
+            if (bx2 - 30 > tx1 + 20 and bx1 + 30 < tx2 - 20 and by1 + 30 < ty2 - 20) or \
+                    (bx2 - 30 > bx1_p + 20 and bx1 + 30 < bx2_p - 20 and by2 - 30 > by1_p + 20):
                 return True
-            if bird_x2 > bx1 and bird_x1 < bx2 and bird_y2 > by1:
-                return True
-
         return False
 
     def update_game(self):
-        self.velocity += self.gravity
-        self.canvas.move(self.bird, 0, self.velocity)
-        x, y = self.canvas.coords(self.bird)
-        if y >= self.screen_height - 50 - self.bird_size:
-            self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
-            self.velocity = 0
-        elif y <= 0:
-            self.canvas.coords(self.bird, self.bird_x, 0)
-            self.velocity = 0
-        self.move_pipes()
-        if self.check_collision():
-            self.end_game()
-        else:
+        if self.is_paused:
             self.game_loop_id = self.canvas.after(30, self.update_game)
+            return
+
+        if self.is_replay:
+            # Logique Replay
+            elapsed = (time.time() - self.game_start_time) * 2
+            while self.replay_index < len(self.last_replay_data) - 1 and self.last_replay_data[self.replay_index + 1][
+                0] < elapsed:
+                self.replay_index += 1
+            if self.replay_index < len(self.last_replay_data):
+                self.canvas.coords(self.bird, self.bird_x, self.last_replay_data[self.replay_index][1])
+        else:
+            # === Physique universelle ===
+            self.velocity += self.gravity
+            self.canvas.move(self.bird, 0, self.velocity)
+
+            # Clamp de position
+            coords = self.canvas.coords(self.bird)
+            if coords:
+                y = coords[1]
+                if y < 0:
+                    self.canvas.coords(self.bird, self.bird_x, 0)
+                    self.velocity = 0
+                elif y > self.screen_height - 50 - self.bird_size:
+                    self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
+                    self.velocity = 0
+
+                # Enregistre la position pour le replay
+                self.current_replay_data.append((time.time() - self.game_start_time, y))
+
+        self.move_pipes()
+        if self.check_collision() or (self.is_replay and self.replay_index >= len(self.last_replay_data) - 1):
+            if self.is_replay:
+                self.root.after(1000, self.start_page)
+            else:
+                self.end_game()
+        else:
+            delay = 15 if self.is_replay else 30
+            self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def end_game(self):
-        if hasattr(self, 'game_loop_id'):
-            self.canvas.after_cancel(self.game_loop_id)
+        if self.game_loop_id: self.canvas.after_cancel(self.game_loop_id)
+
+        if not self.is_replay:
+            self.last_replay_data = self.current_replay_data
+            self.last_replay_mode = self.current_mode
 
         if self.current_mode and self.score > self.best_scores[self.current_mode]:
             self.best_scores[self.current_mode] = self.score
-            print(f"Nouveau meilleur score pour {self.current_mode}: {self.best_scores[self.current_mode]}")
 
-        self.clear()  # Arrête le thread série ici
-
+        self.clear()
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        bg_img = Image.open("fond.png").resize((screen_width, screen_height), Image.Resampling.LANCZOS)
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+        bg_img = Image.open("fond.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
         self.bg_over_img = ImageTk.PhotoImage(bg_img)
         self.canvas.create_image(0, 0, anchor="nw", image=self.bg_over_img)
         overlay = Image.new("RGBA", (500, 450), (0, 0, 0, 180))
-        self.overlay_gameover = ImageTk.PhotoImage(overlay)
-        self.canvas.create_image(screen_width / 2, screen_height / 2, image=self.overlay_gameover, anchor="center")
-        self.canvas.create_text(screen_width / 2, screen_height / 2 - 140, text="Game Over", font=("Arial", 40, "bold"),
+        self.overlay_go = ImageTk.PhotoImage(overlay)
+        self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_go, anchor="center")
+
+        self.canvas.create_text(screen_w / 2, screen_h / 2 - 140, text="Game Over", font=("Arial", 40, "bold"),
                                 fill="white")
-        self.canvas.create_text(screen_width / 2, screen_height / 2 - 80, text=f"Score : {self.score}",
+        self.canvas.create_text(screen_w / 2, screen_h / 2 - 80, text=f"Score : {self.score}",
+                                font=("Arial", 24, "bold"), fill="white")
+        self.canvas.create_text(screen_w / 2, screen_h / 2 - 40,
+                                text=f"Best ({self.current_mode}) : {self.best_scores.get(self.current_mode, 0)}",
                                 font=("Arial", 24, "bold"), fill="white")
 
-        current_best = self.best_scores.get(self.current_mode, 0)
-        self.canvas.create_text(screen_width / 2, screen_height / 2 - 40,
-                                text=f"Best ({self.current_mode}) : {current_best}",
-                                font=("Arial", 24, "bold"), fill="white")
-
-        btn_font_normal = ("Arial", 16, "bold")
-        btn_font_hover = ("Arial", 18, "bold")
-
-        btn_style = {
-            "font": btn_font_normal,
-            "relief": "flat",
-            "padx": 15,
-            "pady": 5,
-            "width": 15,
-        }
-
-        btn_restart = tk.Button(self.root, text="Restart",
-                                **btn_style,
-                                bg="#4CAF50", fg="white",
-                                activebackground="#8BC34A",
-                                command=lambda: self.start_game(self.current_mode))
-
-        btn_menu = tk.Button(self.root, text="Retour au menu",
-                             **btn_style,
-                             bg="#FFD700", fg="black",
-                             activebackground="#FFFF99",
-                             command=self.start_page)
-
-        btn_quit = tk.Button(self.root, text="Quitter",
-                             **btn_style,
-                             bg="#FF4C4C", fg="white",
-                             activebackground="#FF8888",
-                             command=self.quit_game)
-
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 40, window=btn_restart)
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 100, window=btn_menu)
-        self.canvas.create_window(screen_width / 2, screen_height / 2 + 160, window=btn_quit)
-
-        buttons = [btn_restart, btn_menu, btn_quit]
-        for btn in buttons:
-            btn.bind("<Enter>", lambda e, b=btn, f=btn_font_hover: b.config(font=f))
-            btn.bind("<Leave>", lambda e, b=btn, f=btn_font_normal: b.config(font=f))
+        btn_style = {"font": ("Arial", 16, "bold"), "relief": "flat", "padx": 15, "pady": 5, "width": 15}
+        tk.Button(self.root, text="Restart", **btn_style, bg="#4CAF50", fg="white",
+                  command=lambda: self.start_game(self.current_mode)).place(x=screen_w / 2, y=screen_h / 2 + 40,
+                                                                            anchor="center")
+        tk.Button(self.root, text="Menu", **btn_style, bg="#FFD700", fg="black", command=self.start_page).place(
+            x=screen_w / 2, y=screen_h / 2 + 100, anchor="center")
+        tk.Button(self.root, text="Quitter", **btn_style, bg="#FF4C4C", fg="white", command=self.quit_game).place(
+            x=screen_w / 2, y=screen_h / 2 + 160, anchor="center")
 
     def on_space_press(self, event):
-        self.velocity = self.flap_strength
+        if not self.is_paused and not self.is_replay and self.current_mode in ["push_button", "encoder"]:
+            self.velocity = self.flap_strength
 
     def quit_game(self):
-        self.clear()  # S'assure d'arrêter le thread série
+        self.clear()
         self.root.destroy()
 
     def clear(self):
-        """Arrête toutes les boucles 'after' et ferme le port série."""
-
-        # Arrête toutes les boucles "after"
-        if self.blink_after_id:
-            self.root.after_cancel(self.blink_after_id)
-            self.blink_after_id = None
-
-        if self.game_loop_id:
-            self.root.after_cancel(self.game_loop_id)
-            self.game_loop_id = None
-
-        if self.goku_hover_id:
-            self.root.after_cancel(self.goku_hover_id)
-            self.goku_hover_id = None
-
-        if self.db_loop_id:
-            self.root.after_cancel(self.db_loop_id)
-            self.db_loop_id = None
-
-        # Arrête le thread série et ferme le port
+        if self.blink_after_id: self.root.after_cancel(self.blink_after_id); self.blink_after_id = None
+        if self.game_loop_id: self.root.after_cancel(self.game_loop_id); self.game_loop_id = None
+        if self.goku_hover_id: self.root.after_cancel(self.goku_hover_id); self.goku_hover_id = None
         self.stop_serial_thread()
-
-        # Détruit tous les widgets (Canvas, Buttons, etc.)
         for widget in self.root.winfo_children():
             widget.destroy()
 
@@ -626,3 +514,4 @@ class FlappyGUI:
 if __name__ == "__main__":
     root = tk.Tk()
     app = FlappyGUI(root)
+    root.mainloop()

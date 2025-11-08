@@ -12,7 +12,7 @@ class FlappyGUI:
     def init_serial_thread(self):
         """Initialise le port série"""
         try:
-            self.ser = serial.Serial('COM13', 9600, timeout=0.1)
+            self.ser = serial.Serial('COM4', 9600, timeout=0.1)
         except serial.SerialException:
             print("Erreur : impossible d'ouvrir le port série COM4")
             return
@@ -52,17 +52,26 @@ class FlappyGUI:
 
                     elif line.startswith("ULTRA:"):
                         try:
-        # extraire seulement les chiffres
+                            # extraire seulement les chiffres
                             val_cm = int(''.join(filter(str.isdigit, line.split(":")[1])))
                             if self.current_mode == "ultrasound":
                                 self.root.after(0, lambda v=val_cm: self.ultrasound(v))
                         except ValueError:
-                                pass
+                            pass
 
                     elif line.startswith("ENCODER:"):
-                        # Donnée envoyée par Yacine : "ENCODER:LEFT" ou "ENCODER:RIGHT"
+                        
                         direction = line.split(":")[1].strip().upper()
                         self.root.after(0, lambda d=direction: self.handle_encoder(d))
+
+                    
+                    elif line.startswith("IR:"):
+                        try:
+                            val_ir = int(''.join(filter(str.isdigit, line.split(":")[1])))
+                            if self.current_mode == "infrared":
+                                self.root.after(0, lambda v=val_ir: self.infrared(v))
+                        except ValueError:
+                            pass
 
 
                 except Exception as e:
@@ -70,8 +79,8 @@ class FlappyGUI:
                     break
             else:
                 threading.Event().wait(0.01)
-    
-        # --- ENVOI DU SCORE AU PIC ---
+
+    # --- ENVOI DU SCORE AU PIC ---
     def send_score_to_pic(self):
         """Envoie le score actuel au PIC pour affichage sur 7 segments"""
         try:
@@ -81,7 +90,6 @@ class FlappyGUI:
                 print(f"[DEBUG] Score envoyé au PIC : {message.strip()}")
         except Exception as e:
             print(f"Erreur envoi score au PIC : {e}")
-
 
     # INITIALISATION
     def __init__(self, root):
@@ -107,6 +115,12 @@ class FlappyGUI:
         self.current_replay_data = []
         self.last_replay_data = []
         self.replay_index = 0
+
+        # --- AJOUTS POUR REPLAY ---
+        self.last_replay_mode = None
+        self.current_seed = None
+        self.last_replay_seed = None
+        # --------------------------
 
         self.smooth_y = None
 
@@ -136,8 +150,8 @@ class FlappyGUI:
                 self.goku_hover_direction *= -1
             self.goku_hover_id = self.root.after(50, self.animate_goku_hover)
 
-    #Modes
-    #Infrarouge
+    # Modes
+    # Infrarouge
     def infrared(self, val):
         """Contrôle par capteur infrarouge : plus la main est proche, plus Goku monte"""
         if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
@@ -154,26 +168,33 @@ class FlappyGUI:
         # Appliquer une impulsion verticale (comme un flap doux)
         self.velocity = -flap_power
 
-        elapsed = time.time() - self.game_start_time
-        coords = self.canvas.coords(self.bird)
-        if coords:
-            self.current_replay_data.append((elapsed, coords[1]))
-
-
-#encoder
+    # encoder
     def handle_encoder(self, data):
         """Déplacement vertical avec encodeur"""
-        if not self.bird or not self.canvas.winfo_exists():
+        if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
             return
+
+        # Initialise bird_y si pas encore défini
+        if not hasattr(self, 'bird_y'): self.bird_y = self.screen_height // 2
+
         step = 30  # déplacement en pixels
-        if data == "LEFT":  # tourner à gauche → monter
+        if data == "LEFT":  # tourner à gauche -> monter
             self.bird_y = max(0, self.bird_y - step)
-        elif data == "RIGHT":  # tourner à droite → descendre
+        elif data == "RIGHT":  # tourner à droite -> descendre
             self.bird_y = min(self.screen_height - self.bird_size - 50, self.bird_y + step)
+
+        # En mode encoder, on contrôle directement la position Y cible
         self.canvas.coords(self.bird, self.bird_x, self.bird_y)
-        
-#ultrasons
-#JOUER
+        # On annule la vélocité pour ne pas combattre la gravité
+        self.velocity = 0
+
+    # ultrasons
+    def ultrasound(self, val_cm):
+        if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
+            return
+        # Si main à moins de 20cm, on saute
+        if val_cm < 20:
+            self.velocity = self.flap_strength
 
     def start_page(self):
         self.clear()
@@ -300,53 +321,41 @@ class FlappyGUI:
         if not self.last_replay_data:
             self.start_page()
             return
+        # Lance le jeu en mode replay avec le dernier mode utilisé
+        self.start_game(self.last_replay_mode, is_replay=True)
 
-        self.clear()
-        self.is_replay = True
-        self.is_paused = False
-        self.replay_index = 0
-        self.game_start_time = time.time()
-
-        self.canvas = tk.Canvas(self.root, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
-        self.screen_width = self.root.winfo_screenwidth()
-        self.screen_height = self.root.winfo_screenheight()
-        bg_img = Image.open("fond.png").resize((self.screen_width, self.screen_height), Image.Resampling.LANCZOS)
-        self.bg_img = ImageTk.PhotoImage(bg_img)
-        self.canvas.create_image(0, 0, anchor="nw", image=self.bg_img)
-        self.ground = self.canvas.create_rectangle(0, self.screen_height - 50, self.screen_width, self.screen_height,
-                                                   fill="#DEB887", outline="")
-        self.bird_size = 100
-        self.bird_x = 200
-        # Position de départ pour le replay
-        start_y = self.last_replay_data[0][1] if self.last_replay_data else self.screen_height // 2
-        self.bird_img = ImageTk.PhotoImage(
-            Image.open("goku2.png").resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS))
-        self.bird = self.canvas.create_image(self.bird_x, start_y, anchor="nw", image=self.bird_img)
-
-        self.pipes = []
-        self.pipe_images = []
-        x = self.bird_x + 500
-        for i in range(5):
-            self.create_pipe(x)
-            x += random.randint(250, 400)
-
-        self.passed_dict = {pipe[0]: True for pipe in self.pipes}
-        self.canvas.create_text(self.screen_width / 2, 50, text="REPLAY X2", font=("Arial", 30, "bold"), fill="red")
-
-        self.game_loop_id = self.canvas.after(15, self.update_game)
-
-    def start_game(self, mode):
+    def start_game(self, mode, is_replay=False):
         self.current_mode = mode
+        self.is_replay = is_replay
+
+        # --- GESTION POUR REPLAY ---
+        if not is_replay:
+            self.current_seed = time.time()
+        else:
+            # Si c'est un replay, on réutilise la partie précédente
+            if self.last_replay_seed:
+                self.current_seed = self.last_replay_seed
+            else:
+                self.current_seed = time.time()  # Fallback sécurité
+
+        random.seed(self.current_seed)
+        # ---------------------------------------
+
         self.game_page()
-        self.init_serial_thread()
+        if not is_replay:
+            self.init_serial_thread()
 
     def game_page(self):
         self.clear()
         self.is_paused = False
-        self.is_replay = False
-        self.current_replay_data = []
+
+        # --- INITIALISATION REPLAY ---
         self.game_start_time = time.time()
+        self.current_replay_data = []  # Vide la liste pour la nouvelle partie
+        if self.is_replay:
+            self.replay_index = 0  # Remet l'index à 0 pour la lecture
+        # -----------------------------
+
         self.smooth_y = None
 
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
@@ -363,10 +372,14 @@ class FlappyGUI:
 
         self.bird_size = 100
         self.bird_x = 200
-        self.bird_y = self.screen_height // 2
+
+        # Position de départ (milieu si nouvelle partie, position enregistrée si replay)
+        start_y = self.last_replay_data[0][1] if self.is_replay and self.last_replay_data else self.screen_height // 2
+        self.bird_y = start_y  # Important pour le mode encodeur
+
         img = Image.open("goku2.png").resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS)
         self.bird_img = ImageTk.PhotoImage(img)
-        self.bird = self.canvas.create_image(self.bird_x, self.bird_y, anchor="nw", image=self.bird_img)
+        self.bird = self.canvas.create_image(self.bird_x, start_y, anchor="nw", image=self.bird_img)
 
         self.pipes = []
         self.pipe_images = []
@@ -377,16 +390,23 @@ class FlappyGUI:
 
         self.passed_dict = {pipe[0]: False for pipe in self.pipes}
         self.score = 0
-        self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: 0",
-                                                  font=("Arial", 24, "bold"), fill="white", anchor="ne")
+
+        if self.is_replay:
+            self.canvas.create_text(self.screen_width / 2, 50, text="REPLAY X1.5", font=("Arial", 30, "bold"),
+                                    fill="red")
+        else:
+            self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: 0",
+                                                      font=("Arial", 24, "bold"), fill="white", anchor="ne")
 
         self.velocity = 0
         self.gravity = 1
         self.flap_strength = -15
 
         self.root.bind("<space>", self.on_space_press)
-        self.game_loop_id = self.canvas.after(30, self.update_game)
-#OBSTACLES
+        # Vitesse de boucle adaptée (plus rapide si replay)
+        delay = 20 if self.is_replay else 30
+        self.game_loop_id = self.canvas.after(delay, self.update_game)
+
     def create_pipe(self, x):
         gap = random.randint(180, 250)
         top_h = random.randint(100, self.screen_height - gap - 100)
@@ -398,44 +418,42 @@ class FlappyGUI:
         bot = self.canvas.create_image(x, bottom_y, anchor="nw", image=img_bot)
         self.pipes.append((top, bot))
         self.pipe_images.extend([img_top, img_bot])
+        if hasattr(self, 'passed_dict'):
+            self.passed_dict[top] = False
 
     def move_pipes(self):
-        speed = 16 if self.is_replay else 8
+        speed = 12 if self.is_replay else 8  # Plus rapide en replay
         bird_coords = self.canvas.coords(self.bird)
         if not bird_coords:
             return
         bird_x = bird_coords[0]
 
-        # Déplacement + scoring
         for top, bot in list(self.pipes):
             self.canvas.move(top, -speed, 0)
             self.canvas.move(bot, -speed, 0)
 
-            # Mise à jour du score
-            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[0] + 100 < bird_x:
+            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[
+                0] + 100 < bird_x:
                 self.score += 1
                 self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
                 self.passed_dict[top] = True
-                self.send_score_to_pic()  # ➜ Envoi au PIC à chaque point gagné
+                self.send_score_to_pic()
 
-
-        # Suppression et création des nouveaux tuyaux
         if self.pipes and self.canvas.coords(self.pipes[0][0]) and self.canvas.coords(self.pipes[0][0])[0] < -100:
             try:
                 top, bot = self.pipes.pop(0)
                 self.canvas.delete(top)
                 self.canvas.delete(bot)
-            except Exception as e:
-                print("Erreur suppression tuyaux :", e)
-                return
+                if top in self.passed_dict: del self.passed_dict[top]
+            except:
+                pass
 
-            # Vérifie qu'il reste bien au moins un tuyau avant de calculer le nouveau X
             if self.pipes and self.canvas.coords(self.pipes[-1][0]):
                 last_x = self.canvas.coords(self.pipes[-1][0])[0]
                 new_x = last_x + random.randint(250, 400)
                 self.create_pipe(new_x)
             else:
-                print("Aucun tuyau restant, recréation forcée...")
+                # Fallback si plus de tuyaux
                 self.pipes = []
                 start_x = self.bird_x + 500
                 for i in range(5):
@@ -457,54 +475,64 @@ class FlappyGUI:
             self.game_loop_id = self.canvas.after(30, self.update_game)
             return
 
+        # --- LOGIQUE REPLAY ---
         if self.is_replay:
-            # Logique Replay
-            elapsed = (time.time() - self.game_start_time) * 2
+            # Temps écoulé x1.5 pour accélérer un peu le replay
+            elapsed = (time.time() - self.game_start_time) * 1.5
+
+            # Avance dans les données enregistrées jusqu'au temps actuel
             while self.replay_index < len(self.last_replay_data) - 1 and self.last_replay_data[self.replay_index + 1][
                 0] < elapsed:
                 self.replay_index += 1
+
+            # Applique la position Y enregistrée
             if self.replay_index < len(self.last_replay_data):
                 self.canvas.coords(self.bird, self.bird_x, self.last_replay_data[self.replay_index][1])
-        else:
-            # === Physique universelle ===
-            self.velocity += self.gravity
-            self.canvas.move(self.bird, 0, self.velocity)
 
-            # Clamp de position
+        # --- LOGIQUE JEU NORMAL ---
+        else:
+            # Applique la gravité seulement pour les modes qui en ont besoin (ici tous sauf encoder qui est absolu)
+            if self.current_mode != "encoder":
+                self.velocity += self.gravity
+                self.canvas.move(self.bird, 0, self.velocity)
+
+            # Clamp et enregistrement de la position pour le replay
             coords = self.canvas.coords(self.bird)
             if coords:
-                y = coords[1]
-                if y < 0:
-                    self.canvas.coords(self.bird, self.bird_x, 0)
-                    self.velocity = 0
-                elif y > self.screen_height - 50 - self.bird_size:
-                    self.canvas.coords(self.bird, self.bird_x, self.screen_height - 50 - self.bird_size)
+                y = max(0, min(coords[1], self.screen_height - 50 - self.bird_size))
+                if y != coords[1]:  # Si on a touché un bord, on corrige
+                    self.canvas.coords(self.bird, self.bird_x, y)
                     self.velocity = 0
 
-                # Enregistre la position pour le replay
+                # ENREGISTREMENT : [Temps écoulé, Position Y]
                 self.current_replay_data.append((time.time() - self.game_start_time, y))
 
         self.move_pipes()
+
+        # Fin du jeu ou Fin du replay
         if self.check_collision() or (self.is_replay and self.replay_index >= len(self.last_replay_data) - 1):
             if self.is_replay:
-                self.root.after(1000, self.start_page)
+                self.root.after(1000, self.start_page)  # Retour menu après replay
             else:
                 self.end_game()
         else:
-            delay = 15 if self.is_replay else 30
+            delay = 20 if self.is_replay else 30
             self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def end_game(self):
-        if self.game_loop_id: self.canvas.after_cancel(self.game_loop_id)
+        if hasattr(self, 'game_loop_id'):
+            self.canvas.after_cancel(self.game_loop_id)
 
+        # --- SAUVEGARDE DES DONNÉES POUR LE REPLAY ---
         if not self.is_replay:
             self.last_replay_data = self.current_replay_data
             self.last_replay_mode = self.current_mode
+            self.last_replay_seed = self.current_seed
+        # ---------------------------------------------
 
         if self.current_mode and self.score > self.best_scores[self.current_mode]:
             self.best_scores[self.current_mode] = self.score
-        
-        # Envoi du score final au PIC
+
         self.send_score_to_pic()
         self.send_gameover_to_pic()
 
@@ -519,7 +547,6 @@ class FlappyGUI:
         overlay = Image.new("RGBA", (500, 450), (0, 0, 0, 180))
         self.overlay_go = ImageTk.PhotoImage(overlay)
         self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_go, anchor="center")
-
         self.canvas.create_text(screen_w / 2, screen_h / 2 - 140, text="Game Over", font=("Arial", 40, "bold"),
                                 fill="white")
         self.canvas.create_text(screen_w / 2, screen_h / 2 - 80, text=f"Score : {self.score}",
@@ -552,14 +579,7 @@ class FlappyGUI:
         self.stop_serial_thread()
         for widget in self.root.winfo_children():
             widget.destroy()
-    
-    def ultrasound(self, val_cm):
-        if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
-            return
 
-        if val_cm < 20:  # seuil en cm
-            self.velocity = self.flap_strength  # <-- corrigé
-    
     def send_gameover_to_pic(self):
         try:
             if hasattr(self, 'ser') and self.ser and self.ser.is_open:
@@ -567,7 +587,8 @@ class FlappyGUI:
                 self.ser.write(message.encode())
                 print(f"[DEBUG] Game Over envoyé au PIC : {message.strip()}")
         except Exception as e:
-                print(f"Erreur envoi Game Over au PIC : {e}")
+            print(f"Erreur envoi Game Over au PIC : {e}")
+
 
 if __name__ == "__main__":
     root = tk.Tk()

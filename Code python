@@ -8,24 +8,41 @@ from PIL import Image, ImageTk, Image
 
 class FlappyGUI:
 
-    # COMMUNICATION
+    # ===================================================================
+    # COMMUNICATION 
+    # ===================================================================
     def init_serial_thread(self):
         """Initialise le port série"""
+        print("init_serial_thread appelée")
         try:
+            print(" Tentative ouverture COM4")
             self.ser = serial.Serial('COM4', 9600, timeout=0.1)
-        except serial.SerialException:
-            print("Erreur : impossible d'ouvrir le port série COM4")
+            print("Port ouvert :", self.ser.port)
+        except serial.SerialException as e:
+            print(f"Erreur : impossible d'ouvrir le port série COM4 : {e}")
+            return
+        except Exception as e:
+            print(" Erreur ouverture port :", e)
             return
 
-        if self.current_mode:
-            # Envoie le mode choisi au PIC
-            command_to_send = f"MODE:{self.current_mode.upper()}\n"
-            self.ser.write(command_to_send.encode())
-            print(f"Envoyé au PIC : {command_to_send.strip()}")
+        if hasattr(self, "current_mode") and self.current_mode:
+            # Conversion du mode Python → format PIC
+            mode_map = {
+                "push_button": "PUSHBUTTON",
+                "encoder": "ENCODER",
+                "ultrasound": "ULTRASOUND",
+                "infrared": "INFRARED"
+            }
+            mode_str = mode_map.get(self.current_mode, self.current_mode.upper())
+            msg = f"MODE:{mode_str}\n"
+            print(f" Envoi du mode au PIC : {msg.strip()}")
+            self.ser.write(msg.encode())
 
+        print(" Création thread série...")
         self.serial_thread_stop = threading.Event()
         self.serial_thread = threading.Thread(target=self.read_pic, daemon=True)
         self.serial_thread.start()
+        print("Thread série lancé")
 
     def stop_serial_thread(self):
         if hasattr(self, 'serial_thread_stop') and self.serial_thread_stop:
@@ -37,50 +54,63 @@ class FlappyGUI:
             print("Port série fermé.")
 
     def read_pic(self):
-        """Boucle de lecture des commandes PIC"""
+        """Boucle de lecture des commandes PIC (Logique V2)"""
         while not self.serial_thread_stop.is_set():
-            if hasattr(self, 'ser') and self.ser and self.ser.in_waiting:
-                try:
-                    line = self.ser.readline().decode().strip()
-                    if not line:
-                        continue
+            try:
+                if not hasattr(self, 'ser') or not self.ser or not self.ser.is_open:
+                    break
+                
+                line = self.ser.readline().decode(errors='ignore').strip()
 
-                    # Dispatcher les commandes
-                    if line == "FLAP":
-                        # Pour le mode bouton ou ultrasons
+                if line:
+                    clean = line.strip().upper()
+                    # print(f"Reçu: {clean}") # Décommentez pour debug
+
+                    # --- Dispatcher les commandes (Protocole V2) ---
+                    if clean in ("F", "FL", "FLA", "FLAP"):
+                        # Pour le mode bouton
                         self.root.after(0, self.on_space_press, None)
 
-                    elif line.startswith("ULTRA:"):
-                        try:
-                            # extraire seulement les chiffres
-                            val_cm = int(''.join(filter(str.isdigit, line.split(":")[1])))
-                            if self.current_mode == "ultrasound":
-                                self.root.after(0, lambda v=val_cm: self.ultrasound(v))
-                        except ValueError:
-                            pass
+                    elif clean == "LEFT":
+                        if self.current_mode == "encoder":
+                            self.root.after(0, lambda: self.encoder("LEFT"))
 
-                    elif line.startswith("ENCODER:"):
-                        
-                        direction = line.split(":")[1].strip().upper()
-                        self.root.after(0, lambda d=direction: self.handle_encoder(d))
-
+                    elif clean == "RIGHT":
+                        if self.current_mode == "encoder":
+                            self.root.after(0, lambda: self.encoder("RIGHT"))
                     
-                    elif line.startswith("IR:"):
-                        try:
-                            val_ir = int(''.join(filter(str.isdigit, line.split(":")[1])))
-                            if self.current_mode == "infrared":
-                                self.root.after(0, lambda v=val_ir: self.infrared(v))
-                        except ValueError:
-                            pass
+                    # GESTION DE LA PAUSE 
+                    elif clean == "PAUSE":
+                        self.root.after(0, self.toggle_pause)
+                   
 
+                    elif line.startswith("ULTRA:"):
+                        if self.current_mode == "ultrasound":
+                            try:
+                                cm = int(''.join(filter(str.isdigit, line)))
+                                self.root.after(0, lambda v=cm: self.ultrasound(v))
+                            except ValueError:
+                                pass
+                    
+                    elif clean.replace(" ", "").isdigit():
+                        # Donnée numérique seule = Infrarouge
+                        if self.current_mode == "infrared":
+                            try:
+                                val = int(clean.strip().lstrip('0') or '0')
+                                self.root.after(0, lambda v=val: self.infrared(v))
+                            except ValueError:
+                                pass
+                                
+            except serial.SerialException:
+                print(" Port série déconnecté.")
+                break
+            except Exception as e:
+                print(f" Erreur dans thread série : {e}")
+                
+            # Pause courte pour éviter d'occuper le CPU
+            time.sleep(0.01)
 
-                except Exception as e:
-                    print(f"Erreur lecture série : {e}")
-                    break
-            else:
-                threading.Event().wait(0.01)
-
-    # --- ENVOI DU SCORE AU PIC ---
+    # --- ENVOI DU SCORE AU PIC (V1) ---
     def send_score_to_pic(self):
         """Envoie le score actuel au PIC pour affichage sur 7 segments"""
         try:
@@ -91,7 +121,9 @@ class FlappyGUI:
         except Exception as e:
             print(f"Erreur envoi score au PIC : {e}")
 
-    # INITIALISATION
+    # ===================================================================
+    # INITIALISATION 
+    # ===================================================================
     def __init__(self, root):
         self.root = root
         self.root.title("Flappy Goku")
@@ -116,12 +148,13 @@ class FlappyGUI:
         self.last_replay_data = []
         self.replay_index = 0
 
-        # --- AJOUTS POUR REPLAY ---
+        # --- AJOUTS POUR REPLAY (V1) ---
         self.last_replay_mode = None
         self.current_seed = None
         self.last_replay_seed = None
-        # --------------------------
+        # -------------------------------
 
+        # Pour le lissage (V2)
         self.smooth_y = None
 
         self.ser = None
@@ -134,11 +167,10 @@ class FlappyGUI:
     def toggle_press_start_text(self):
         """Fait clignoter le texte 'Press Start'"""
         if hasattr(self, 'canvas') and self.canvas.winfo_exists() and hasattr(self, 'press_to_start_text'):
-            if self.press_start_visible:
-                self.canvas.itemconfig(self.press_to_start_text, state='hidden')
-            else:
-                self.canvas.itemconfig(self.press_to_start_text, state='normal')
-            self.press_start_visible = not self.press_start_visible
+            # Version V2 (plus propre)
+            state = self.canvas.itemcget(self.press_to_start_text, 'state')
+            new_state = 'hidden' if state == 'normal' else 'normal'
+            self.canvas.itemconfig(self.press_to_start_text, state=new_state)
             self.blink_after_id = self.root.after(500, self.toggle_press_start_text)
 
     def animate_goku_hover(self):
@@ -150,54 +182,95 @@ class FlappyGUI:
                 self.goku_hover_direction *= -1
             self.goku_hover_id = self.root.after(50, self.animate_goku_hover)
 
-    # Modes
-    # Infrarouge
+    # ===================================================================
+    # MODES DE CONTRÔLE 
+    # ===================================================================
+
+    # --- Infrarouge 
     def infrared(self, val):
-        """Contrôle par capteur infrarouge : plus la main est proche, plus Goku monte"""
+        """Met à jour la position de Goku selon la distance main-capteur (IR)"""
         if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
             return
 
-        val_min = 70
-        val_max = 400
+        # --- Calibration (à ajuster selon ton capteur) ---
+        val_min = 70   # main éloignée → bas (Valeur V1)
+        val_max = 400  # main proche → haut (Valeur V1)
+
+        # Clamp (bloque entre min et max)
         val = max(min(val, val_max), val_min)
+        
+        # Zone morte (V2)
+        if abs(val - getattr(self, "last_val", val)) < 5:
+             return
+        self.last_val = val
 
-        # Calcul de la "force de flap" selon la distance
-        ratio = 1 - (val - val_min) / (val_max - val_min)
-        flap_power = (ratio - 0.5) * 30  # varie entre -15 et +15
+        # --- Mapping vers la hauteur de l’écran ---
+        y_min = 0 # Haut de l'écran
+        y_max = self.screen_height - self.bird_size - 50 # Bas de l'écran (sol)
+        # Ratio inversé : valeur haute (proche) = Y bas (haut de l'écran)
+        ratio = 1 - (val - val_min) / (val_max - val_min) 
+        y_target = y_min + ratio * (y_max - y_min)
 
-        # Appliquer une impulsion verticale (comme un flap doux)
-        self.velocity = -flap_power
+        # --- Mouvement plus fluide (V2) ---
+        if not hasattr(self, "smooth_y") or self.smooth_y is None:
+            self.smooth_y = y_target
+        self.smooth_y = 0.85 * self.smooth_y + 0.15 * y_target
 
-    # encoder
-    def handle_encoder(self, data):
-        """Déplacement vertical avec encodeur"""
+        # --- Appliquer la position ---
+        self.canvas.coords(self.bird, self.bird_x, self.smooth_y)
+        # Le replay est enregistré dans update_game
+
+    # --- Encodeur (Logique V2 : mouvement relatif, CORRIGÉ) ---
+    def encoder(self, direction):
+        """Déplacement du personnage avec l'encodeur (mouvement relatif)"""
         if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
             return
+        
+        step = 30 # Déplacement en pixels
+        
+        # Logique Corrigée : LEFT=UP, RIGHT=DOWN
+        if direction == "LEFT":
+            self.canvas.move(self.bird, 0, -step) # Monter
+        elif direction == "RIGHT":
+            self.canvas.move(self.bird, 0, step) # Descendre
 
-        # Initialise bird_y si pas encore défini
-        if not hasattr(self, 'bird_y'): self.bird_y = self.screen_height // 2
+        # Le replay est enregistré dans update_game
 
-        step = 30  # déplacement en pixels
-        if data == "LEFT":  # tourner à gauche -> monter
-            self.bird_y = max(0, self.bird_y - step)
-        elif data == "RIGHT":  # tourner à droite -> descendre
-            self.bird_y = min(self.screen_height - self.bird_size - 50, self.bird_y + step)
-
-        # En mode encoder, on contrôle directement la position Y cible
-        self.canvas.coords(self.bird, self.bird_x, self.bird_y)
-        # On annule la vélocité pour ne pas combattre la gravité
-        self.velocity = 0
-
-    # ultrasons
+    # --- Ultrasons 
     def ultrasound(self, val_cm):
         if self.is_paused or self.is_replay or not hasattr(self, 'bird') or not self.canvas.winfo_exists():
             return
-        # Si main à moins de 20cm, on saute
-        if val_cm < 20:
-            self.velocity = self.flap_strength
+
+        seuil_cm = 20         # main plus proche que ça => on saute (V1)
+        hysteresis = 5        # évite de resauter (V2)
+        now = time.time()
+        cooldown = 0.2        # minimum entre deux flaps (V2)
+
+        if not hasattr(self, "last_ultra_time"):
+            self.last_ultra_time = 0
+            self.last_state_near = False
+
+        # Détection approche main (V2)
+        if val_cm < seuil_cm - hysteresis and not self.last_state_near and (now - self.last_ultra_time) > cooldown:
+            print(f" FLAP détecté à {val_cm} cm")
+            self.last_ultra_time = now
+            self.last_state_near = True
+            # On appelle on_space_press pour appliquer le flap
+            self.root.after(0, self.on_space_press, None) 
+
+        # Si la main repart loin → on réarme le capteur (V2)
+        elif val_cm > seuil_cm + hysteresis:
+            self.last_state_near = False
+
+    # ===================================================================
+    # PAGES ET MENUS 
+    # ===================================================================
 
     def start_page(self):
         self.clear()
+    
+        self.root.bind("<Escape>", lambda e: self.root.destroy())
+        
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
         screen_w = self.root.winfo_screenwidth()
@@ -215,7 +288,6 @@ class FlappyGUI:
                                 fill="white")
         self.press_to_start_text = self.canvas.create_text(screen_w / 2, screen_h / 2 - 100, text="Press Start",
                                                            font=("Arial", 22, "bold"), fill="#FFD700")
-        self.press_start_visible = True
         self.toggle_press_start_text()
 
         img = Image.open("goku2.png").resize((150, 150), Image.Resampling.LANCZOS)
@@ -230,11 +302,13 @@ class FlappyGUI:
                              command=self.select_mode_page)
         btn_inst = tk.Button(self.root, text="Instructions", **btn_style, bg="#FFA500", fg="black",
                              activebackground="#FFC966", command=self.regle)
+      
         btn_replay = tk.Button(self.root, text="Replay", **btn_style, bg="#4CAF50", fg="white",
                                activebackground="#8BC34A", command=self.replay_game_page)
         btn_quit = tk.Button(self.root, text="Quitter", **btn_style, bg="#FF4C4C", fg="white",
                              activebackground="#FF8888", command=self.quit_game)
 
+        # Disposition V1 (create_window)
         self.canvas.create_window(screen_w / 2, screen_h / 2 - 30, window=btn_play)
         self.canvas.create_window(screen_w / 2, screen_h / 2 + 30, window=btn_inst)
         self.canvas.create_window(screen_w / 2, screen_h / 2 + 90, window=btn_replay)
@@ -273,6 +347,7 @@ class FlappyGUI:
         btn5 = tk.Button(self.root, text="Retour", **btn_style, bg="#FF4C4C", fg="white", activebackground="#FF8888",
                          command=self.start_page)
 
+        # Disposition V1 (create_window)
         self.canvas.create_window(screen_w // 2, screen_h // 2 - 100, window=btn1)
         self.canvas.create_window(screen_w // 2, screen_h // 2 - 40, window=btn2)
         self.canvas.create_window(screen_w // 2, screen_h // 2 + 20, window=btn3)
@@ -291,33 +366,46 @@ class FlappyGUI:
         self.canvas.pack(fill="both", expand=True)
 
         try:
+            # Image V1 (regles.png)
             bg_img = Image.open("regles.png").resize((screen_w, screen_h), Image.Resampling.LANCZOS)
             self.bg_regle_img = ImageTk.PhotoImage(bg_img)
             self.canvas.create_image(0, 0, anchor="nw", image=self.bg_regle_img)
         except FileNotFoundError:
             self.canvas.config(bg="#2196F3")
 
-        overlay = Image.new("RGBA", (int(screen_w * 0.55), int(screen_h * 0.5)), (0, 0, 0, 160))
+        overlay = Image.new("RGBA", (int(screen_w * 0.6), int(screen_h * 0.6)), (0, 0, 0, 160))
         self.overlay_regle_img = ImageTk.PhotoImage(overlay)
         self.canvas.create_image(screen_w / 2, screen_h / 2, image=self.overlay_regle_img, anchor="center")
 
-        self.canvas.create_text(screen_w / 2, screen_h * 0.28, text="Comment Jouer", font=("Arial", 32, "bold"),
+        self.canvas.create_text(screen_w / 2, screen_h * 0.25, text="Comment Jouer", font=("Arial", 32, "bold"),
                                 fill="#FFD700")
-        self.canvas.create_text(screen_w / 2, screen_h * 0.36,
+        self.canvas.create_text(screen_w / 2, screen_h * 0.32,
                                 text="Le but du jeu est simple :\nFais voler Goku sans qu’il touche les Kamehameha !",
                                 font=("Arial", 16, "italic"), fill="white", justify="center")
+        
+        
         self.canvas.create_text(screen_w / 2, screen_h * 0.5,
-                                text="• Push Button : Appuie sur le bouton pour voler.\n• Digital Encoder : Tourne l'encodeur pour voler.\n• Ultrasound Sensor : Passe ta main au-dessus.\n• Infrared Sensor : Passe ta main devant.",
+                                text="• Push Button : Appuie sur le bouton pour voler.\n"
+                                     "• Digital Encoder : Tourne l'encodeur pour voler.\n"
+                                     "• Ultrasound Sensor : Passe ta main au-dessus.\n"
+                                     "• Infrared Sensor : Passe ta main devant.\n\n"
+                                     "• Bouton Pause / Touche 'X' : Met le jeu en pause.\n"
+                                     "• Touche 'Échap' : Quitte la partie et retourne au menu.",
                                 font=("Arial", 18), fill="white", justify="left")
-        self.canvas.create_text(screen_w / 2, screen_h * 0.64,
+       
+        
+        self.canvas.create_text(screen_w / 2, screen_h * 0.68,
                                 text="Si tu touches le sol ou un Kamehameha, c’est perdu !",
                                 font=("Arial", 16, "italic"), fill="white", justify="center")
 
         btn_retour = tk.Button(self.root, text="Retour au menu", font=("Arial", 16, "bold"), bg="#FFD700", fg="black",
                                relief="flat", activebackground="#FFFF99", command=self.start_page)
-        self.canvas.create_window(screen_w / 2, screen_h * 0.73, window=btn_retour)
+        self.canvas.create_window(screen_w / 2, screen_h * 0.78, window=btn_retour)
 
+
+    
     def replay_game_page(self):
+        # Logique V1
         if not self.last_replay_data:
             self.start_page()
             return
@@ -325,38 +413,42 @@ class FlappyGUI:
         self.start_game(self.last_replay_mode, is_replay=True)
 
     def start_game(self, mode, is_replay=False):
+        
         self.current_mode = mode
         self.is_replay = is_replay
 
-        # --- GESTION POUR REPLAY ---
+        # GESTION REPLAY 
         if not is_replay:
             self.current_seed = time.time()
         else:
-            # Si c'est un replay, on réutilise la partie précédente
             if self.last_replay_seed:
                 self.current_seed = self.last_replay_seed
             else:
-                self.current_seed = time.time()  # Fallback sécurité
+                self.current_seed = time.time() # Fallback
 
         random.seed(self.current_seed)
-        # ---------------------------------------
+        
 
         self.game_page()
+        
+        # Ajout V2 (redémarrage propre du thread)
         if not is_replay:
+            self.stop_serial_thread()
             self.init_serial_thread()
 
     def game_page(self):
         self.clear()
-        self.is_paused = False
+        self.is_paused = False # Assure que le jeu démarre non-pausé
 
-        # --- INITIALISATION REPLAY ---
+        # INITIALISATION REPLAY 
         self.game_start_time = time.time()
-        self.current_replay_data = []  # Vide la liste pour la nouvelle partie
+        self.current_replay_data = []
         if self.is_replay:
-            self.replay_index = 0  # Remet l'index à 0 pour la lecture
-        # -----------------------------
-
-        self.smooth_y = None
+            self.replay_index = 0
+      
+        
+        # Reset lissage V2
+        self.smooth_y = None 
 
         self.canvas = tk.Canvas(self.root, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
@@ -373,9 +465,9 @@ class FlappyGUI:
         self.bird_size = 100
         self.bird_x = 200
 
-        # Position de départ (milieu si nouvelle partie, position enregistrée si replay)
+        # Position de départ V1 (gère le replay)
         start_y = self.last_replay_data[0][1] if self.is_replay and self.last_replay_data else self.screen_height // 2
-        self.bird_y = start_y  # Important pour le mode encodeur
+        self.bird_y = start_y  # Important pour l'encodeur V1
 
         img = Image.open("goku2.png").resize((self.bird_size, self.bird_size), Image.Resampling.LANCZOS)
         self.bird_img = ImageTk.PhotoImage(img)
@@ -394,20 +486,38 @@ class FlappyGUI:
         if self.is_replay:
             self.canvas.create_text(self.screen_width / 2, 50, text="REPLAY X1.5", font=("Arial", 30, "bold"),
                                     fill="red")
+            
+            self.canvas.create_text(10, self.screen_height - 10, text="Appuyez sur 'Echap' pour quitter le mode replay",
+                                    font=("Arial", 14, "bold"), fill="white", anchor="sw")
         else:
             self.score_text = self.canvas.create_text(self.screen_width - 50, 50, text=f"Score: 0",
                                                       font=("Arial", 24, "bold"), fill="white", anchor="ne")
+           
+            self.canvas.create_text(10, self.screen_height - 10, 
+                                    text="Echap: Menu | X: Pause",
+                                    font=("Arial", 14, "bold"), fill="white", anchor="sw")
 
         self.velocity = 0
         self.gravity = 1
         self.flap_strength = -15
 
+        # --- LIAISON DES TOUCHES ---
         self.root.bind("<space>", self.on_space_press)
-        # Vitesse de boucle adaptée (plus rapide si replay)
+        
+        
+        
+        self.root.bind("<Escape>", lambda e: self.root.after(1, self.start_page))
+        
+        
+    
+        # (Ne fait rien en replay)
+        self.root.bind("x", lambda e: self.toggle_pause())
+
         delay = 20 if self.is_replay else 30
         self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def create_pipe(self, x):
+        # Logique V1 (liée au replay seedé)
         gap = random.randint(180, 250)
         top_h = random.randint(100, self.screen_height - gap - 100)
         bottom_y = top_h + gap
@@ -422,7 +532,8 @@ class FlappyGUI:
             self.passed_dict[top] = False
 
     def move_pipes(self):
-        speed = 12 if self.is_replay else 8  # Plus rapide en replay
+        # Logique V1
+        speed = 12 if self.is_replay else 8
         bird_coords = self.canvas.coords(self.bird)
         if not bird_coords:
             return
@@ -432,7 +543,7 @@ class FlappyGUI:
             self.canvas.move(top, -speed, 0)
             self.canvas.move(bot, -speed, 0)
 
-            if not self.is_replay and not self.passed_dict.get(top, False) and self.canvas.coords(top)[
+            if not self.is_replay and self.passed_dict.get(top, False) == False and self.canvas.coords(top)[
                 0] + 100 < bird_x:
                 self.score += 1
                 self.canvas.itemconfigure(self.score_text, text=f"Score: {self.score}")
@@ -452,14 +563,9 @@ class FlappyGUI:
                 last_x = self.canvas.coords(self.pipes[-1][0])[0]
                 new_x = last_x + random.randint(250, 400)
                 self.create_pipe(new_x)
-            else:
-                # Fallback si plus de tuyaux
-                self.pipes = []
-                start_x = self.bird_x + 500
-                for i in range(5):
-                    self.create_pipe(start_x + i * 300)
 
     def check_collision(self):
+    
         bx1, by1, bx2, by2 = self.canvas.bbox(self.bird)
         if by1 <= 0 or by2 >= self.screen_height - 50: return True
         for top, bot in self.pipes:
@@ -471,48 +577,52 @@ class FlappyGUI:
         return False
 
     def update_game(self):
+    
         if self.is_paused:
+            # Si le jeu est en pause, on ne fait rien à part
+            # relancer cette même vérification après 30ms.
             self.game_loop_id = self.canvas.after(30, self.update_game)
             return
 
-        # --- LOGIQUE REPLAY ---
+        # LOGIQUE REPLAY 
         if self.is_replay:
-            # Temps écoulé x1.5 pour accélérer un peu le replay
             elapsed = (time.time() - self.game_start_time) * 1.5
-
-            # Avance dans les données enregistrées jusqu'au temps actuel
             while self.replay_index < len(self.last_replay_data) - 1 and self.last_replay_data[self.replay_index + 1][
                 0] < elapsed:
                 self.replay_index += 1
 
-            # Applique la position Y enregistrée
             if self.replay_index < len(self.last_replay_data):
                 self.canvas.coords(self.bird, self.bird_x, self.last_replay_data[self.replay_index][1])
 
-        # --- LOGIQUE JEU NORMAL ---
+        # --- LOGIQUE JEU NORMAL 
         else:
-            # Applique la gravité seulement pour les modes qui en ont besoin (ici tous sauf encoder qui est absolu)
-            if self.current_mode != "encoder":
+            # Applique la gravité SEULEMENT pour les modes "flap"
+            if self.current_mode in ["push_button", "ultrasound"]:
                 self.velocity += self.gravity
                 self.canvas.move(self.bird, 0, self.velocity)
+            
+            # Pour "encoder" et "infrared", le mouvement est géré
+            # directement par read_pic() -> encoder() / infrared()
+            # Donc on n'applique pas de gravité.
 
-            # Clamp et enregistrement de la position pour le replay
+            # Clamp et enregistrement (Logique V1)
             coords = self.canvas.coords(self.bird)
             if coords:
                 y = max(0, min(coords[1], self.screen_height - 50 - self.bird_size))
-                if y != coords[1]:  # Si on a touché un bord, on corrige
+                if y != coords[1]:  # Si on a touché un bord
                     self.canvas.coords(self.bird, self.bird_x, y)
-                    self.velocity = 0
+                    if self.current_mode in ["push_button", "ultrasound"]:
+                        self.velocity = 0 # Arrête la vélocité si on touche un bord
 
-                # ENREGISTREMENT : [Temps écoulé, Position Y]
+                # ENREGISTREMENT REPLAY 
                 self.current_replay_data.append((time.time() - self.game_start_time, y))
 
         self.move_pipes()
 
-        # Fin du jeu ou Fin du replay
+        # Fin du jeu ou Fin du replay (V1)
         if self.check_collision() or (self.is_replay and self.replay_index >= len(self.last_replay_data) - 1):
             if self.is_replay:
-                self.root.after(1000, self.start_page)  # Retour menu après replay
+                self.root.after(1000, self.start_page)  # Retour menu
             else:
                 self.end_game()
         else:
@@ -520,15 +630,16 @@ class FlappyGUI:
             self.game_loop_id = self.canvas.after(delay, self.update_game)
 
     def end_game(self):
+        # Logique V1 (Sauvegarde Replay)
         if hasattr(self, 'game_loop_id'):
             self.canvas.after_cancel(self.game_loop_id)
 
-        # --- SAUVEGARDE DES DONNÉES POUR LE REPLAY ---
+        #  SAUVEGARDE REPLAY  
         if not self.is_replay:
             self.last_replay_data = self.current_replay_data
             self.last_replay_mode = self.current_mode
             self.last_replay_seed = self.current_seed
-        # ---------------------------------------------
+       
 
         if self.current_mode and self.score > self.best_scores[self.current_mode]:
             self.best_scores[self.current_mode] = self.score
@@ -555,6 +666,7 @@ class FlappyGUI:
                                 text=f"Best ({self.current_mode}) : {self.best_scores.get(self.current_mode, 0)}",
                                 font=("Arial", 24, "bold"), fill="white")
 
+      #disposition
         btn_style = {"font": ("Arial", 16, "bold"), "relief": "flat", "padx": 15, "pady": 5, "width": 15}
         tk.Button(self.root, text="Restart", **btn_style, bg="#4CAF50", fg="white",
                   command=lambda: self.start_game(self.current_mode)).place(x=screen_w / 2, y=screen_h / 2 + 40,
@@ -565,8 +677,45 @@ class FlappyGUI:
             x=screen_w / 2, y=screen_h / 2 + 160, anchor="center")
 
     def on_space_press(self, event):
-        if not self.is_paused and not self.is_replay and self.current_mode in ["push_button", "encoder"]:
+       
+        if not self.is_paused and not self.is_replay and self.current_mode in ["push_button", "ultrasound"]:
             self.velocity = self.flap_strength
+        
+        elif not self.is_paused and not self.is_replay and self.current_mode == "encoder":
+             pass # L'espace ne fait rien en mode encodeur
+
+   # fonction pause 
+    def toggle_pause(self):
+        # Ne pas mettre en pause si on est en replay ou pas dans le jeu
+        if self.is_replay or not hasattr(self, 'canvas') or not hasattr(self, 'screen_width'):
+            return
+
+        # Inverser l'état de pause
+        self.is_paused = not self.is_paused
+
+        if self.is_paused:
+            # Créer le texte "PAUSE" au centre
+            self.pause_text = self.canvas.create_text(
+                self.screen_width / 2, 
+                self.screen_height / 2,
+                text="PAUSE",
+                font=("Arial", 60, "bold"),
+                fill="white"
+            )
+            # Afficher aussi dans la console
+            print("[JEU] Pause activée")
+        
+        else:
+            # Reprise : supprimer le texte "PAUSE"
+            if hasattr(self, 'pause_text'):
+                self.canvas.delete(self.pause_text)
+                del self.pause_text
+            
+            # Reprendre la boucle de jeu immédiatement
+            print("[JEU] Reprise")
+            # On relance update_game au lieu d'attendre la prochaine boucle "vide"
+            self.update_game()
+  
 
     def quit_game(self):
         self.clear()
@@ -588,6 +737,12 @@ class FlappyGUI:
                 print(f"[DEBUG] Game Over envoyé au PIC : {message.strip()}")
         except Exception as e:
             print(f"Erreur envoi Game Over au PIC : {e}")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FlappyGUI(root)
+    root.mainloop()
 
 
 if __name__ == "__main__":
